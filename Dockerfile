@@ -10,7 +10,7 @@ RUN mkdir -p /freqtrade/user_data/logs
 EXPOSE 8080
 
 # Set up volume for user_data
-VOLUME ["/freqtrade/user_data"]
+# VOLUME ["/freqtrade/user_data"]
 
 # Default command - runs freqtrade with the same parameters as in docker-compose
 CMD ["trade", \
