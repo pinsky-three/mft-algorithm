@@ -1,23 +1,21 @@
 FROM freqtradeorg/freqtrade:stable
 
-# Set working directory
 WORKDIR /freqtrade
+COPY ./user_data /freqtrade/user_data
 
-# Create user_data directory structure
-RUN mkdir -p /freqtrade/user_data/logs
+USER root
 
-# Expose API port
+RUN chmod -R 777 ./user_data/logs || true && \
+    rm -rf ./user_data/logs && \
+    mkdir -p ./user_data/logs && \
+    chmod -R 777 ./user_data
+
+USER ftuser
+
 EXPOSE 8080
 
-# Set up volume for user_data
-# VOLUME ["/freqtrade/user_data"]o
-
-ENV FREQTRADE__TELEGRAM__TOKEN FREQTRADE__TELEGRAM__TOKEN
-
-# Default command - runs freqtrade with the same parameters as in docker-compose
 CMD ["trade", \
-     "--logfile", "/freqtrade/user_data/logs/freqtrade.log", \
-     "--db-url", "sqlite:////freqtrade/user_data/tradesv3.sqlite", \
-     "--config", "/freqtrade/user_data/config.json", \
+     "--logfile", "./user_data/logs/freqtrade.log", \
+     "--db-url", "sqlite:////./user_data/tradesv3.sqlite", \
+     "--config", "./user_data/config.json", \
      "--strategy", "SampleStrategy"]
-
