@@ -16,6 +16,6 @@ EXPOSE 8080
 
 CMD ["trade", \
      "--logfile", "./user_data/logs/freqtrade.log", \
-     "--db-url", "sqlite:////./user_data/tradesv3.sqlite", \
+     "--db-url", "sqlite:///./user_data/tradesv3.sqlite", \
      "--config", "./user_data/config.json", \
      "--strategy", "SampleStrategy"]
