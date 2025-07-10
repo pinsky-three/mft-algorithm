@@ -1,0 +1,73 @@
+2025-07-10 20:23:55,002 - freqtrade - INFO - freqtrade 2025.6
+2025-07-10 20:23:55,242 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-07-10 20:23:56,303 - freqtrade.configuration.load_config - INFO - Using config: user_data/config.json ...
+2025-07-10 20:23:56,304 - freqtrade.configuration.environment_vars - INFO - Loading variable 'FREQTRADE__EXCHANGE__PAIR_WHITELIST'
+2025-07-10 20:23:56,305 - freqtrade.configuration.environment_vars - INFO - Key parts: ['EXCHANGE', 'PAIR_WHITELIST']
+2025-07-10 20:23:56,305 - freqtrade.configuration.environment_vars - INFO - Loading variable 'FREQTRADE__TELEGRAM__CHAT_ID'
+2025-07-10 20:23:56,305 - freqtrade.configuration.environment_vars - INFO - Key parts: ['TELEGRAM', 'CHAT_ID']
+2025-07-10 20:23:56,306 - freqtrade.configuration.environment_vars - INFO - Loading variable 'FREQTRADE__TELEGRAM__TOKEN'
+2025-07-10 20:23:56,306 - freqtrade.configuration.environment_vars - INFO - Key parts: ['TELEGRAM', 'TOKEN']
+2025-07-10 20:23:56,308 - freqtrade.loggers - INFO - Enabling colorized output.
+2025-07-10 20:23:56,308 - root - INFO - Logfile configured
+2025-07-10 20:23:56,308 - freqtrade.loggers - INFO - Verbosity set to 0
+2025-07-10 20:23:56,309 - freqtrade.configuration.configuration - INFO - Parameter -i/--timeframe detected ... Using timeframe: 1m ...
+2025-07-10 20:23:56,309 - freqtrade.configuration.configuration - INFO - Using max_open_trades: 5 ...
+2025-07-10 20:23:56,310 - freqtrade.configuration.configuration - INFO - Parameter --fee detected, setting fee to: 0.0002 ...
+2025-07-10 20:23:56,310 - freqtrade.configuration.configuration - INFO - Parameter --timerange detected: 20240601-20240630 ...
+2025-07-10 20:23:56,377 - freqtrade.configuration.configuration - INFO - Using user-data directory: user_data ...
+2025-07-10 20:23:56,378 - freqtrade.configuration.configuration - INFO - Using data directory: user_data/data/binance ...
+2025-07-10 20:23:56,379 - freqtrade.configuration.configuration - INFO - Overriding timeframe with Command line argument
+2025-07-10 20:23:56,379 - freqtrade.configuration.configuration - INFO - Parameter --cache=none detected ...
+2025-07-10 20:23:56,380 - freqtrade.configuration.configuration - INFO - Using pairs ['BTC/USDT']
+2025-07-10 20:23:56,380 - freqtrade.configuration.configuration - INFO - Filter trades by timerange: 20240601-20240630
+2025-07-10 20:23:56,381 - freqtrade.exchange.check_exchange - INFO - Checking exchange...
+2025-07-10 20:23:56,391 - freqtrade.exchange.check_exchange - INFO - Exchange "binance" is officially supported by the Freqtrade development team.
+2025-07-10 20:23:56,392 - freqtrade.configuration.config_validation - INFO - Validating configuration ...
+2025-07-10 20:23:56,394 - freqtrade.commands.optimize_commands - INFO - Starting freqtrade in Backtesting mode
+2025-07-10 20:23:56,394 - freqtrade.exchange.exchange - INFO - Instance is running with dry_run enabled
+2025-07-10 20:23:56,395 - freqtrade.exchange.exchange - INFO - Using CCXT 4.4.91
+2025-07-10 20:23:56,410 - freqtrade.exchange.exchange - INFO - Using Exchange "Binance"
+2025-07-10 20:23:58,512 - freqtrade.resolvers.exchange_resolver - INFO - Using resolved exchange 'Binance'...
+2025-07-10 20:23:58,558 - freqtrade.resolvers.iresolver - INFO - Using resolved strategy MultiHorizonMomentum from '/freqtrade/user_data/strategies/MultiHorizonMomentumStrategy.py'...
+2025-07-10 20:23:58,560 - freqtrade.strategy.hyper - INFO - Found no parameter file.
+2025-07-10 20:23:58,562 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'timeframe' with value in config file: 1m.
+2025-07-10 20:23:58,563 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'order_types' with value in config file: {'entry': 'limit', 'exit': 'limit', 'stoploss': 'market', 
+'stoploss_on_exchange': False, 'stoploss_on_exchange_interval': 60, 'emergency_exit': 'market'}.
+2025-07-10 20:23:58,563 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'stake_currency' with value in config file: USDT.
+2025-07-10 20:23:58,564 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'stake_amount' with value in config file: 20.
+2025-07-10 20:23:58,565 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'startup_candle_count' with value in config file: 400.
+2025-07-10 20:23:58,565 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'unfilledtimeout' with value in config file: {'entry': 10, 'exit': 10, 'exit_timeout_count': 0, 'unit': 
+'minutes'}.
+2025-07-10 20:23:58,566 - freqtrade.resolvers.strategy_resolver - INFO - Override strategy 'max_open_trades' with value in config file: 5.
+2025-07-10 20:23:58,566 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using minimal_roi: {}
+2025-07-10 20:23:58,567 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using timeframe: 1m
+2025-07-10 20:23:58,567 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using stoploss: -0.3
+2025-07-10 20:23:58,568 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using trailing_stop: False
+2025-07-10 20:23:58,569 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using trailing_stop_positive_offset: 0.0
+2025-07-10 20:23:58,569 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using trailing_only_offset_is_reached: False
+2025-07-10 20:23:58,570 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using use_custom_stoploss: False
+2025-07-10 20:23:58,571 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using process_only_new_candles: True
+2025-07-10 20:23:58,571 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using order_types: {'entry': 'limit', 'exit': 'limit', 'stoploss': 'market', 'stoploss_on_exchange': False, 
+'stoploss_on_exchange_interval': 60, 'emergency_exit': 'market'}
+2025-07-10 20:23:58,572 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using order_time_in_force: {'entry': 'GTC', 'exit': 'GTC'}
+2025-07-10 20:23:58,572 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using stake_currency: USDT
+2025-07-10 20:23:58,573 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using stake_amount: 20
+2025-07-10 20:23:58,573 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using startup_candle_count: 400
+2025-07-10 20:23:58,574 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using unfilledtimeout: {'entry': 10, 'exit': 10, 'exit_timeout_count': 0, 'unit': 'minutes'}
+2025-07-10 20:23:58,574 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using use_exit_signal: True
+2025-07-10 20:23:58,575 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using exit_profit_only: False
+2025-07-10 20:23:58,575 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using ignore_roi_if_entry_signal: False
+2025-07-10 20:23:58,575 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using exit_profit_offset: 0.0
+2025-07-10 20:23:58,576 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using disable_dataframe_checks: False
+2025-07-10 20:23:58,576 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using ignore_buying_expired_candle_after: 0
+2025-07-10 20:23:58,576 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using position_adjustment_enable: False
+2025-07-10 20:23:58,577 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using max_entry_position_adjustment: -1
+2025-07-10 20:23:58,577 - freqtrade.resolvers.strategy_resolver - INFO - Strategy using max_open_trades: 5
+2025-07-10 20:23:58,577 - freqtrade.configuration.config_validation - INFO - Validating configuration ...
+2025-07-10 20:23:58,589 - freqtrade.resolvers.iresolver - INFO - Using resolved pairlist StaticPairList from '/freqtrade/freqtrade/plugins/pairlist/StaticPairList.py'...
+2025-07-10 20:23:58,610 - freqtrade.optimize.backtesting - INFO - Using fee 0.0200% from config.
+2025-07-10 20:23:58,612 - freqtrade.data.history.history_utils - INFO - Using indicator startup period: 400 ...
+2025-07-10 20:23:59,208 - freqtrade.data.history.datahandlers.idatahandler - WARNING - BTC/USDT, spot, 1m, data starts at 2024-07-10 00:00:00
+2025-07-10 20:23:59,235 - freqtrade.data.history.datahandlers.idatahandler - WARNING - No history for BTC/USDT, spot, 1m found. Use `freqtrade download-data` to download the data
+2025-07-10 20:23:59,236 - freqtrade - ERROR - No data found. Terminating.
+

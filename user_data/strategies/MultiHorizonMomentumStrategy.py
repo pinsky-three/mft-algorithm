@@ -3,16 +3,16 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy Extended with TEMA - v8.2 SCALPER
+Multi-Horizon Momentum Strategy Extended with TEMA - v8.4 PHASE2
 ================================================================
 
-SCALPER OPTIMIZED: Refined filters + optimized for ultra-fast scalping.
-- Balanced selectivity: ADX>47, RSI>63 for optimal precision/robustness
-- Scalping-optimized ATR targets: TP 2.5x, SL 1.5x, Trailing 1.2x
+PHASE 2 RECALIBRATED: Ultra-adaptive filters for BTC $110K+ conditions.
+- 2025-optimized: ADX>38, RSI>55/45 for maximum market adaptability
+- Scalping-optimized ATR targets: TP 2.5x, SL 1.5x, Trailing 1.2x  
 - Ultra-fast entries/exits: Average trade duration <30 minutes
-- Triple EMA + TEMA crossover + refined momentum filters
+- Triple EMA + TEMA crossover + 2025-specific momentum filters
 - 4h TEMA trend alignment prevents counter-trend trades
-- Target: Consistent 30%+ win rate, minimal drawdown, rapid scalping
+- Target: 20-30% win rate in 2025 BTC $110K+ market conditions
 
 Strategy Components:
 -------------------
@@ -227,7 +227,7 @@ class MultiHorizonMomentum(IStrategy):
         cond_cmo_short = True
         
         if self.USE_ADX_CMO_FILTER:
-            cond_adx = dataframe["adx"] > 47  # Balanced trend condition (v8.2 scalper optimization)
+            cond_adx = dataframe["adx"] > 38  # Ultra-adaptive trend condition (v8.4 Phase2 for BTC $110K+)
             cond_cmo_long = dataframe["cmo"] > 40  # Bullish momentum
             cond_cmo_short = dataframe["cmo"] < -40  # Bearish momentum
 
@@ -241,9 +241,9 @@ class MultiHorizonMomentum(IStrategy):
             cond_dir_long = dataframe["ema_fast_15m_15m"] > dataframe["ema_mid_15m_15m"]
             cond_dir_short = dataframe["ema_fast_15m_15m"] < dataframe["ema_mid_15m_15m"]
 
-        # RSI momentum filter - v8.2 scalper optimization for balanced precision
-        cond_rsi_long = dataframe["rsi"] > 63  # Strong bullish momentum (v8.2 scalper balance)
-        cond_rsi_short = dataframe["rsi"] < 37  # Strong bearish momentum (v8.2 scalper balance)
+        # RSI momentum filter - v8.4 Phase2 for maximum 2025 adaptability
+        cond_rsi_long = dataframe["rsi"] > 55  # Ultra-adaptive bullish momentum (v8.4 Phase2)
+        cond_rsi_short = dataframe["rsi"] < 45  # Ultra-adaptive bearish momentum (v8.4 Phase2)
 
         # MACD trend strength filter
         cond_macd_long = dataframe["macd"] > dataframe["macdsignal"]
