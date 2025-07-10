@@ -5,7 +5,7 @@ if [ ! -f "./user_data/config.json" ]; then
     echo "Config file not found, creating default config.json..."
     mkdir -p ./user_data
     
-    # Create a basic config.json
+    # Create a basic config.json directly in user_data (running as root)
     cat > ./user_data/config.json << 'EOF'
 {
     "max_open_trades": 3,
@@ -97,8 +97,15 @@ if [ ! -f "./user_data/config.json" ]; then
     }
 }
 EOF
+    # Set proper ownership and permissions for ftuser
+    chown -R ftuser:ftuser ./user_data
+    chmod -R 755 ./user_data
+    chmod 644 ./user_data/config.json
     echo "Created default config.json"
 fi
 
-# Start freqtrade with the provided arguments
-exec freqtrade "$@" 
+# Ensure proper ownership of user_data directory
+chown -R ftuser:ftuser ./user_data 2>/dev/null || true
+
+# Switch to ftuser and start freqtrade with the provided arguments
+exec su-exec ftuser freqtrade "$@" 
