@@ -66,7 +66,7 @@ class MultiHorizonMomentum(IStrategy):
     # ---------------------------------------------------------------------
     # Configuration flags
     # ---------------------------------------------------------------------
-    USE_USDT_FILTER: bool = True  # set to False if no USDT dominance data
+    USE_USDT_FILTER: bool = False  # set to False if no USDT dominance data
 
     # ------------------------------------------------------------------
     # Informative pairs
