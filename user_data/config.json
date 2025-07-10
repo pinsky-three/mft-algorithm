@@ -30,6 +30,13 @@
     "use_order_book": true,
     "order_book_top": 1
   },
+  "order_types": {
+    "entry": "limit",
+    "exit": "limit",
+    "stoploss": "market",
+    "stoploss_on_exchange": false,
+    "stoploss_on_exchange_interval": 60
+  },
   "exchange": {
     "name": "binance",
     "key": "",
