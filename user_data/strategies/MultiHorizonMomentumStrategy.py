@@ -3,36 +3,54 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - BREAKEVEN v7
-==============================================================
+Multi-Horizon Momentum Strategy Extended with TEMA - v8 ULTIMATE
+================================================================
 
-FINAL PUSH: Ultra-selective filters targeting first profitable algorithm.
-- Ultra-precision: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter  
+ENHANCED: Combining original EMA momentum with TEMA trend-following system.
+- Triple EMA + TEMA crossover for ultra-precision entries
+- ADX + CMO momentum filters for higher win rate
+- 4h TEMA trend alignment prevents counter-trend trades
 - Pure ATR exits: Conservative TP 3.5x, SL 2x, Trailing 1.5x
-- v6 baseline: 40.7% win rate, -1.58 USDT (68% loss reduction achieved)
+- Optional short trading capability
 
-Risk / exit management (Final v3)
----------------------------------
-* Hard stop-loss  : 2.0 ATR(100) below entry price (realistic margin for market noise).
-* Take-profit     : 4.0 ATR(100) above entry price (risk/reward 1:2).
-* Trailing stop   : 1.5 ATR(100) once in profit.
-* Fast exit       : Very large red candle (>0.8 ATR) prevents major reversals.
-* Exit orders     : Market stoploss for better execution.
-* Fees            : Optimized for maker fees (0.02%) vs. taker (0.04%).
+Strategy Components:
+-------------------
+1. **Original System**: Triple EMA (30/120/360) + RSI + MACD + Volume
+2. **TEMA System**: TEMA(10/80) crossover + 4h TEMA(20/70) alignment
+3. **Momentum Filters**: ADX > 40 + CMO thresholds for direction
+4. **Risk Management**: Pure ATR-based exits (proven 47.2% win rate)
 
-Filters & Optimizations v6 ULTIMATE (Pure ATR)
------------------------------------------------
-1. **Precision entries**: Triple EMA + RSI>55 + MACD bullish + Volume surge
-2. **Directional filter**: 15m EMAs (30/120) alignment prevents counter-trend trades  
-3. **Volume filter**: 1.7x rolling mean + 5min growth for dynamic liquidity
-4. **Pure ATR exits**: TP/SL/Trailing ONLY (47.2% win rate confirmed)
-5. **ALL exit signals ELIMINATED**: EMA, RSI, MACD all toxic in 1m scalping
-6. **Expected performance**: PROFITABLE - no more 0% win rate exit signals
-7. **Risk management**: 2x ATR SL, 4x ATR TP, 1.5x ATR trailing (proven system)
-8. **Execution**: Maker fees optimized, market stoploss for speed
+Entry Conditions (LONG):
+-----------------------
+- Triple EMA alignment (30 > 120 > 360)
+- TEMA short-term uptrend (TEMA10 > TEMA80)  
+- TEMA long-term uptrend (TEMA20_4h > TEMA70_4h)
+- Strong momentum: ADX > 40 AND CMO > 40
+- RSI > 60 (momentum confirmation)
+- MACD bullish divergence
+- Volume surge (2x average)
+- 15m directional filter alignment
 
-Back-test commands
------------------
+Entry Conditions (SHORT - optional):
+-----------------------------------
+- Triple EMA downtrend (30 < 120 < 360)
+- TEMA short-term downtrend (TEMA10 < TEMA80)
+- TEMA long-term downtrend (TEMA20_4h < TEMA70_4h)  
+- Strong momentum: ADX > 40 AND CMO < -40
+- RSI < 40 (bearish momentum)
+- MACD bearish divergence
+- Volume surge (2x average)
+- 15m directional filter alignment
+
+Risk Management:
+---------------
+- Stop Loss: 2.0 ATR below/above entry
+- Take Profit: 3.5 ATR above/below entry  
+- Trailing Stop: 1.5 ATR once in profit
+- Emergency Stop: 30% hard floor
+
+Back-test commands:
+------------------
 # With fees (realistic)
 freqtrade backtesting -s MultiHorizonMomentum -p BTC/USDT,ETH/USDT --fee 0.1 --timeframe 1m
 
@@ -57,13 +75,13 @@ from freqtrade.strategy import IStrategy, merge_informative_pair
 # ────────────────────────────────────────────────────────────────────────────────
 
 class MultiHorizonMomentum(IStrategy):
-    """Daily EMA(5/21/63) trend-following with ATR exits."""
+    """Enhanced momentum strategy with TEMA trend-following and ATR exits."""
 
     INTERFACE_VERSION = 3
     timeframe: str = "1m"
-    can_short: bool = False
+    can_short: bool = False  # Set to True to enable short trading
 
-    # Amount of history needed for indicators: max(360 for EMA, 100 for ATR)
+    # Amount of history needed for indicators: max(360 for EMA, 100 for ATR, 80 for TEMA)
     startup_candle_count: int = 400
 
     # No static ROI - we exit via custom_exit / stoploss
@@ -78,13 +96,15 @@ class MultiHorizonMomentum(IStrategy):
     # ---------------------------------------------------------------------
     # Configuration flags
     # ---------------------------------------------------------------------
-    USE_USDT_FILTER: bool = False  # ojo: CRYPTOCAP:USDT.D no existe a 1m
+    USE_USDT_FILTER: bool = False  # CRYPTOCAP:USDT.D no existe a 1m
+    USE_TEMA_FILTER: bool = True   # Enable TEMA crossover filters
+    USE_ADX_CMO_FILTER: bool = True # Enable ADX/CMO momentum filters
 
     # ------------------------------------------------------------------
     # Informative pairs
     # ------------------------------------------------------------------
     def informative_pairs(self) -> List[Tuple[str, str]]:
-        """Request 15m timeframe for directional filter.
+        """Request 15m and 4h timeframes for directional filters.
         
         USDT dominance filter is disabled for 1m trading.
         """
@@ -94,6 +114,7 @@ class MultiHorizonMomentum(IStrategy):
         if self.dp and self.dp.current_whitelist():
             for pair in self.dp.current_whitelist():
                 pairs.append((pair, "15m"))
+                pairs.append((pair, "4h"))  # For TEMA long-term trend
         
         if self.USE_USDT_FILTER:
             pairs.append(("USDT.D", "1d"))  # TradingView / CryptoCap ticker
@@ -103,10 +124,15 @@ class MultiHorizonMomentum(IStrategy):
     # Indicator calculation
     # ------------------------------------------------------------------
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        # EMA stack
+        # Original EMA stack
         dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=30)   # 30 min
         dataframe["ema_mid"] = ta.EMA(dataframe, timeperiod=120)  # 2  h
         dataframe["ema_slow"] = ta.EMA(dataframe, timeperiod=360) # 6  h
+
+        # TEMA indicators for trend-following
+        if self.USE_TEMA_FILTER:
+            dataframe["tema10"] = ta.TEMA(dataframe, timeperiod=10)  # Short-term TEMA
+            dataframe["tema80"] = ta.TEMA(dataframe, timeperiod=80)  # Long-term TEMA
 
         # ATR for risk management
         dataframe["atr100"] = ta.ATR(dataframe, timeperiod=100)
@@ -120,6 +146,11 @@ class MultiHorizonMomentum(IStrategy):
         dataframe["macdsignal"] = macd["macdsignal"]
         dataframe["macdhist"] = macd["macdhist"]
 
+        # ADX and CMO for momentum filtering
+        if self.USE_ADX_CMO_FILTER:
+            dataframe["adx"] = ta.ADX(dataframe, timeperiod=14)
+            dataframe["cmo"] = ta.CMO(dataframe, timeperiod=14)
+
         # EMAs 15m para filtro direccional
         if self.dp and metadata:
             try:
@@ -132,6 +163,19 @@ class MultiHorizonMomentum(IStrategy):
             except Exception:
                 # En caso de que falten datos 15m
                 pass
+
+            # TEMA 4h para tendencia de largo plazo
+            if self.USE_TEMA_FILTER:
+                try:
+                    informative_4h = self.dp.get_pair_dataframe(pair=metadata["pair"], timeframe="4h")
+                    informative_4h["tema20_4h"] = ta.TEMA(informative_4h, timeperiod=20)
+                    informative_4h["tema70_4h"] = ta.TEMA(informative_4h, timeperiod=70)
+                    dataframe = merge_informative_pair(
+                        dataframe, informative_4h, self.timeframe, "4h", ffill=True
+                    )
+                except Exception:
+                    # En caso de que falten datos 4h
+                    pass
 
         # Merge USDT dominance if available
         if self.USE_USDT_FILTER and self.dp:
@@ -149,36 +193,105 @@ class MultiHorizonMomentum(IStrategy):
     # Entry logic
     # ------------------------------------------------------------------
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        cond_ema = (
+        # Original EMA alignment condition
+        cond_ema_long = (
             (dataframe["ema_fast"] > dataframe["ema_mid"]) &
             (dataframe["ema_mid"] > dataframe["ema_slow"])
         )
+        
+        cond_ema_short = (
+            (dataframe["ema_fast"] < dataframe["ema_mid"]) &
+            (dataframe["ema_mid"] < dataframe["ema_slow"])
+        )
+
+        # TEMA trend conditions
+        cond_tema_short_long = True
+        cond_tema_short_short = True
+        cond_tema_long_long = True
+        cond_tema_long_short = True
+        
+        if self.USE_TEMA_FILTER:
+            # Short-term TEMA trend (1m timeframe)
+            cond_tema_short_long = dataframe["tema10"] > dataframe["tema80"]
+            cond_tema_short_short = dataframe["tema10"] < dataframe["tema80"]
+            
+            # Long-term TEMA trend (4h timeframe)
+            if "tema20_4h_4h" in dataframe.columns and "tema70_4h_4h" in dataframe.columns:
+                cond_tema_long_long = dataframe["tema20_4h_4h"] > dataframe["tema70_4h_4h"]
+                cond_tema_long_short = dataframe["tema20_4h_4h"] < dataframe["tema70_4h_4h"]
+
+        # ADX and CMO momentum conditions
+        cond_adx = True
+        cond_cmo_long = True
+        cond_cmo_short = True
+        
+        if self.USE_ADX_CMO_FILTER:
+            cond_adx = dataframe["adx"] > 40  # Strong trend condition
+            cond_cmo_long = dataframe["cmo"] > 40  # Bullish momentum
+            cond_cmo_short = dataframe["cmo"] < -40  # Bearish momentum
 
         # Filtro de liquidez ultra selectivo (solo trades premium)
         cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 2.0
 
         # Filtro direccional 15m (evita operar contra micro-tendencia)
-        cond_dir = True  # Default en caso de que no haya datos 15m
+        cond_dir_long = True  # Default en caso de que no haya datos 15m
+        cond_dir_short = True
         if "ema_fast_15m_15m" in dataframe.columns and "ema_mid_15m_15m" in dataframe.columns:
-            cond_dir = dataframe["ema_fast_15m_15m"] > dataframe["ema_mid_15m_15m"]
+            cond_dir_long = dataframe["ema_fast_15m_15m"] > dataframe["ema_mid_15m_15m"]
+            cond_dir_short = dataframe["ema_fast_15m_15m"] < dataframe["ema_mid_15m_15m"]
 
-        # RSI momentum filter (solo comprar en momentum alcista)
-        cond_rsi = dataframe["rsi"] > 60  # Ultra selectivo para máxima precisión
+        # RSI momentum filter
+        cond_rsi_long = dataframe["rsi"] > 60  # Ultra selectivo para máxima precisión
+        cond_rsi_short = dataframe["rsi"] < 40  # Bearish momentum
 
-        # MACD trend strength filter (MACD por encima de señal)
-        cond_macd = dataframe["macd"] > dataframe["macdsignal"]
+        # MACD trend strength filter
+        cond_macd_long = dataframe["macd"] > dataframe["macdsignal"]
+        cond_macd_short = dataframe["macd"] < dataframe["macdsignal"]
         
         # Volume rate of change (liquidez dinámica)
         cond_volume_roc = dataframe['volume'].pct_change(5) > 0  # volumen creciente últimos 5min
 
-        # Optional USDT dominance filter: 7‑day SMA trending **down**
+        # Optional USDT dominance filter
+        cond_usdt = True
         if self.USE_USDT_FILTER and "usdt_sma7_1d" in dataframe:
             cond_usdt = dataframe["usdt_sma7_1d"].diff() < 0  # today lower than yesterday
-            entry_condition = cond_ema & cond_usdt & cond_volume & cond_dir & cond_rsi & cond_macd & cond_volume_roc
-        else:
-            entry_condition = cond_ema & cond_volume & cond_dir & cond_rsi & cond_macd & cond_volume_roc
 
-        dataframe.loc[entry_condition, "enter_long"] = 1
+        # LONG entry conditions (all filters combined)
+        long_entry_condition = (
+            cond_ema_long & 
+            cond_tema_short_long & 
+            cond_tema_long_long &
+            cond_adx & 
+            cond_cmo_long &
+            cond_volume & 
+            cond_dir_long & 
+            cond_rsi_long & 
+            cond_macd_long & 
+            cond_volume_roc &
+            cond_usdt
+        )
+
+        # SHORT entry conditions (all filters combined)
+        short_entry_condition = (
+            cond_ema_short & 
+            cond_tema_short_short & 
+            cond_tema_long_short &
+            cond_adx & 
+            cond_cmo_short &
+            cond_volume & 
+            cond_dir_short & 
+            cond_rsi_short & 
+            cond_macd_short & 
+            cond_volume_roc &
+            cond_usdt
+        )
+
+        dataframe.loc[long_entry_condition, "enter_long"] = 1
+        
+        # Only enable short entries if can_short is True
+        if self.can_short:
+            dataframe.loc[short_entry_condition, "enter_short"] = 1
+            
         return dataframe
 
     # ------------------------------------------------------------------
@@ -191,31 +304,40 @@ class MultiHorizonMomentum(IStrategy):
         return dataframe
 
     # ------------------------------------------------------------------
-    # Custom stoploss based on ATR(14)
+    # Custom stoploss based on ATR(100) - supports both long and short
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 0.8 ATR(100) below entry price - optimized for fees."""
+        """Hard SL at 2.0 ATR(100) from entry price - optimized for fees."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
         atr = dataframe["atr100"].iloc[-1]
         if atr == 0:
             return 1
-        # Price distance to entry
-        distance = (trade.open_rate - current_rate)
+        
         # SL dinámico a 2.0x ATR (margen realista para market noise)
         sl_atr = 2.0 * atr
-        if distance >= sl_atr:
-            return 0.01  # triggers immediate SL exit
+        
+        if trade.is_short:
+            # SHORT: SL triggers when price goes UP by 2 ATR from entry
+            distance = (current_rate - trade.open_rate)
+            if distance >= sl_atr:
+                return 0.01  # triggers immediate SL exit
+        else:
+            # LONG: SL triggers when price goes DOWN by 2 ATR from entry
+            distance = (trade.open_rate - current_rate)
+            if distance >= sl_atr:
+                return 0.01  # triggers immediate SL exit
+        
         return 1  # no update
 
     # ------------------------------------------------------------------
-    # Custom exit for ATR take-profit and trailing
+    # Custom exit for ATR take-profit and trailing - supports long and short
     # ------------------------------------------------------------------
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-        """Take profit at 2 ATR(100) OR trail stop at 1 ATR once in profit."""
+        """Take profit at 3.5 ATR(100) OR trail stop at 1.5 ATR once in profit."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return None
@@ -225,21 +347,46 @@ class MultiHorizonMomentum(IStrategy):
             return None
 
         entry = trade.open_rate
-        tp_price = entry + 3.5 * atr  # 3.5x ATR más conservador y alcanzable
-        sl_trail = entry + 1.5 * atr  # 1.5x ATR trailing
+        
+        if trade.is_short:
+            # SHORT positions: profit when price goes DOWN
+            tp_price = entry - 3.5 * atr  # Take profit 3.5 ATR below entry
+            sl_trail = entry - 1.5 * atr  # Trailing stop 1.5 ATR below entry
+            
+            # Take-profit hit (price dropped enough)
+            if current_rate <= tp_price:
+                return {
+                    "exit_tag": "atr_tp_short",
+                    "exit_type": "exit_signal",
+                }
 
-        # Take-profit hit
-        if current_rate >= tp_price:
-            return {
-                "exit_tag": "atr_tp",
-                "exit_type": "exit_signal",
-            }
+            # Trailing: price went in our favor (down), but bounced back above trail
+            if (trade.min_rate is not None and 
+                trade.min_rate <= sl_trail and 
+                current_rate > sl_trail):
+                return {
+                    "exit_tag": "atr_trail_short",
+                    "exit_type": "exit_signal",
+                }
+        else:
+            # LONG positions: profit when price goes UP  
+            tp_price = entry + 3.5 * atr  # Take profit 3.5 ATR above entry
+            sl_trail = entry + 1.5 * atr  # Trailing stop 1.5 ATR above entry
 
-        # Trailing: price went 1 ATR in our favour, but drops back below SL trail
-        if trade.max_rate is not None and trade.max_rate >= sl_trail and current_rate < sl_trail:
-            return {
-                "exit_tag": "atr_trail",
-                "exit_type": "exit_signal",
-            }
+            # Take-profit hit (price rose enough)
+            if current_rate >= tp_price:
+                return {
+                    "exit_tag": "atr_tp_long",
+                    "exit_type": "exit_signal",
+                }
+
+            # Trailing: price went in our favor (up), but dropped back below trail
+            if (trade.max_rate is not None and 
+                trade.max_rate >= sl_trail and 
+                current_rate < sl_trail):
+                return {
+                    "exit_tag": "atr_trail_long",
+                    "exit_type": "exit_signal",
+                }
 
         return None
