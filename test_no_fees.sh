@@ -19,7 +19,7 @@ docker compose run --rm freqtrade backtesting \
   -s MultiHorizonMomentum \
   -p BTC/USDT \
   --timerange 20241201-20241202 \
-  --fee 0.1 \
+  --fee 0.0004 \
   --timeframe 1m \
 
 
