@@ -50,9 +50,9 @@
       "method": "StaticPairList"
     }
   ],
-  "timeframe": "5m",
+  "timeframe": "1m",
   "informative_pairs": [],
-  "startup_candle_count": 30,
+  "startup_candle_count": 400,
   "bot_name": "freqtrade",
   "force_entry_enable": false,
   "initial_state": "running",

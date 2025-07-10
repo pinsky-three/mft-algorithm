@@ -19,13 +19,12 @@ Risk / exit management
 
 Notes
 -----
-1. Timeframe is **1d** to imitate the daily rebalance in the spec.
-2. If your exchange does **not** provide a symbol for USDT dominance
-   ("CRYPTOCAP:USDT.D" on TradingView, for example) comment-out the
-   informative-pair section and set ``USE_USDT_FILTER = False``.
-3. Back-test on Binance futures example command::
-       freqtrade backtesting -s multi_horizon_momentum \
-         -p BTC/USDT,ETH/USDT,SOL/USDT --timeframe 1d
+1. Timeframe is **1m** with adjusted EMAs (30m/2h/6h) for intraday momentum.
+2. USDT dominance filter is disabled as CRYPTOCAP:USDT.D is not available at 1m.
+3. Added volume filter for liquidity confirmation.
+4. Back-test on Binance example command::
+       freqtrade backtesting -s MultiHorizonMomentum \
+         -p BTC/USDT,ETH/USDT,SOL/USDT --timeframe 1m
 """
 
 from datetime import datetime
@@ -48,11 +47,11 @@ class MultiHorizonMomentum(IStrategy):
     """Daily EMA(5/21/63) trend-following with ATR exits."""
 
     INTERFACE_VERSION = 3
-    timeframe: str = "1d"
+    timeframe: str = "1m"
     can_short: bool = False
 
-    # Amount of history needed for indicators: max(63 for EMA, 14 for ATR)
-    startup_candle_count: int = 100
+    # Amount of history needed for indicators: max(360 for EMA, 100 for ATR)
+    startup_candle_count: int = 400
 
     # No static ROI - we exit via custom_exit / stoploss
     minimal_roi: Dict[str, float] = {}
@@ -66,16 +65,15 @@ class MultiHorizonMomentum(IStrategy):
     # ---------------------------------------------------------------------
     # Configuration flags
     # ---------------------------------------------------------------------
-    USE_USDT_FILTER: bool = False  # set to False if no USDT dominance data
+    USE_USDT_FILTER: bool = False  # ojo: CRYPTOCAP:USDT.D no existe a 1m
 
     # ------------------------------------------------------------------
     # Informative pairs
     # ------------------------------------------------------------------
     def informative_pairs(self) -> List[Tuple[str, str]]:
-        """Request USDT dominance daily candles as an informative pair.
-
-        Works if your DataProvider is able to fetch the symbol
-        e.g. "CRYPTOCAP:USDT.D" via the *TradingView* exchange plugin.
+        """No informative pairs needed for 1m timeframe strategy.
+        
+        USDT dominance filter is disabled for 1m trading.
         """
         pairs: List[Tuple[str, str]] = []
         if self.USE_USDT_FILTER:
@@ -87,12 +85,12 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # EMA stack
-        dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=5)
-        dataframe["ema_mid"] = ta.EMA(dataframe, timeperiod=21)
-        dataframe["ema_slow"] = ta.EMA(dataframe, timeperiod=63)
+        dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=30)   # 30 min
+        dataframe["ema_mid"] = ta.EMA(dataframe, timeperiod=120)  # 2  h
+        dataframe["ema_slow"] = ta.EMA(dataframe, timeperiod=360) # 6  h
 
         # ATR for risk management
-        dataframe["atr14"] = ta.ATR(dataframe, timeperiod=14)
+        dataframe["atr100"] = ta.ATR(dataframe, timeperiod=100)
 
         # Merge USDT dominance if available
         if self.USE_USDT_FILTER and self.dp:
@@ -115,12 +113,15 @@ class MultiHorizonMomentum(IStrategy):
             (dataframe["ema_mid"] > dataframe["ema_slow"])
         )
 
+        # Filtro de liquidez
+        cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean()
+
         # Optional USDT dominance filter: 7‑day SMA trending **down**
         if self.USE_USDT_FILTER and "usdt_sma7_1d" in dataframe:
             cond_usdt = dataframe["usdt_sma7_1d"].diff() < 0  # today lower than yesterday
-            entry_condition = cond_ema & cond_usdt
+            entry_condition = cond_ema & cond_usdt & cond_volume
         else:
-            entry_condition = cond_ema
+            entry_condition = cond_ema & cond_volume
 
         dataframe.loc[entry_condition, "enter_long"] = 1
         return dataframe
@@ -139,11 +140,11 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 1 ATR(14) below entry price."""
+        """Hard SL at 1 ATR(100) below entry price."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
-        atr = dataframe["atr14"].iloc[-1]
+        atr = dataframe["atr100"].iloc[-1]
         if atr == 0:
             return 1
         # Price distance to entry
@@ -158,12 +159,12 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-        """Take profit at 2 ATR(14) OR trail stop at 1 ATR once in profit."""
+        """Take profit at 2 ATR(100) OR trail stop at 1 ATR once in profit."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return None
 
-        atr = dataframe["atr14"].iloc[-1]
+        atr = dataframe["atr100"].iloc[-1]
         if atr == 0:
             return None
 
