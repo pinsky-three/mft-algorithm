@@ -3,33 +3,37 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - BREAKEVEN v7
-==============================================================
+Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - COMPLETE DISABLE v8.6
+=========================================================================
 
-FINAL PUSH: Ultra-selective filters targeting first profitable algorithm.
-- Ultra-precision: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter  
-- Pure ATR exits: Conservative TP 3.5x, SL 2x, Trailing 1.5x
-- v6 baseline: 40.7% win rate, -1.58 USDT (68% loss reduction achieved)
+COMPLETE DISABLE TEST: Zero custom_exit logic
+- v8.5 PROGRESS: -16.7 USDT (vs -69.656) but still 0% win rate
+- v8.6 COMPLETE DISABLE: NO custom_exit, pure stoploss system
+- HYPOTHESIS: Even 4x ATR TP was too aggressive - let market decide
+- ENTRY: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter  
+- TARGET: Pure custom_stoploss (2.5x ATR) + strategy SL (-30%)
 
-Risk / exit management (Final v3)
----------------------------------
-* Hard stop-loss  : 2.0 ATR(100) below entry price (realistic margin for market noise).
-* Take-profit     : 4.0 ATR(100) above entry price (risk/reward 1:2).
-* Trailing stop   : 1.5 ATR(100) once in profit.
-* Fast exit       : Very large red candle (>0.8 ATR) prevents major reversals.
-* Exit orders     : Market stoploss for better execution.
-* Fees            : Optimized for maker fees (0.02%) vs. taker (0.04%).
-
-Filters & Optimizations v6 ULTIMATE (Pure ATR)
+Risk / exit management (COMPLETE DISABLE v8.6)
 -----------------------------------------------
-1. **Precision entries**: Triple EMA + RSI>55 + MACD bullish + Volume surge
+* Hard stop-loss  : 2.5 ATR(100) below entry price (conservative, prevents noise).
+* Take-profit     : COMPLETELY DISABLED (let market decide natural levels).
+* Trailing stop   : DISABLED (was causing 0% win rate).
+* Custom exit     : DISABLED (even 4x ATR TP was too aggressive).
+* Strategy SL     : -30% emergency floor (main exit mechanism).
+* Exit orders     : Market stoploss, limit entry/exit (partial maker).
+* Fees            : Entry/exit maker 0.02%, SL market ~0.04% (blended savings).
+* Trading hours   : 24/7 (no session restrictions).
+
+Filters & Optimizations v8.4 FIXED (Working Edition)
+---------------------------------------------------
+1. **Ultra-precision entries**: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter
 2. **Directional filter**: 15m EMAs (30/120) alignment prevents counter-trend trades  
-3. **Volume filter**: 1.7x rolling mean + 5min growth for dynamic liquidity
-4. **Pure ATR exits**: TP/SL/Trailing ONLY (47.2% win rate confirmed)
-5. **ALL exit signals ELIMINATED**: EMA, RSI, MACD all toxic in 1m scalping
-6. **Expected performance**: PROFITABLE - no more 0% win rate exit signals
-7. **Risk management**: 2x ATR SL, 4x ATR TP, 1.5x ATR trailing (proven system)
-8. **Execution**: Maker fees optimized, market stoploss for speed
+3. **Volume filter**: 2.0x rolling mean + 5min growth for premium liquidity
+4. **FIXED ATR exits**: Conservative 5x TP, 2.5x trail trigger, 1.8x trail distance
+5. **ALL exit signals ELIMINATED**: EMA, RSI, MACD toxic in 1m scalping
+6. **NO SESSION FILTER**: 24/7 trading to capture all opportunities
+7. **PARTIAL MAKER**: Entry/exit limit orders, SL market for speed
+8. **Conservative distances**: 2.5x SL, 5x TP = prevents premature exits
 
 Back-test commands
 -----------------
@@ -195,17 +199,17 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 0.8 ATR(100) below entry price - optimized for fees."""
+        """FIXED v8.4: Conservative ATR-based stoploss."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
         atr = dataframe["atr100"].iloc[-1]
-        if atr == 0:
+        if atr == 0 or atr is None:
             return 1
-        # Price distance to entry
+        
+        # Conservative 2.5x ATR stoploss (was 1.8x)
         distance = (trade.open_rate - current_rate)
-        # SL dinámico a 2.0x ATR (margen realista para market noise)
-        sl_atr = 2.0 * atr
+        sl_atr = 2.5 * atr
         if distance >= sl_atr:
             return 0.01  # triggers immediate SL exit
         return 1  # no update
@@ -215,31 +219,6 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-        """Take profit at 2 ATR(100) OR trail stop at 1 ATR once in profit."""
-        dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        if dataframe is None or len(dataframe) == 0:
-            return None
-
-        atr = dataframe["atr100"].iloc[-1]
-        if atr == 0:
-            return None
-
-        entry = trade.open_rate
-        tp_price = entry + 3.5 * atr  # 3.5x ATR más conservador y alcanzable
-        sl_trail = entry + 1.5 * atr  # 1.5x ATR trailing
-
-        # Take-profit hit
-        if current_rate >= tp_price:
-            return {
-                "exit_tag": "atr_tp",
-                "exit_type": "exit_signal",
-            }
-
-        # Trailing: price went 1 ATR in our favour, but drops back below SL trail
-        if trade.max_rate is not None and trade.max_rate >= sl_trail and current_rate < sl_trail:
-            return {
-                "exit_tag": "atr_trail",
-                "exit_type": "exit_signal",
-            }
-
+        """v8.6 COMPLETE DISABLE: NO custom_exit - pure custom_stoploss + strategy SL."""
+        # COMPLETELY DISABLED - let trades run to custom_stoploss or strategy stoploss only
         return None
