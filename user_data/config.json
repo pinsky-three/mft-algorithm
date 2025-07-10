@@ -43,6 +43,11 @@
     "secret": "",
     "ccxt_config": {},
     "ccxt_async_config": {},
+    "trading": {
+      "fees": {
+        "trading": { "maker": 0.0002, "taker": 0.0004 }
+      }
+    },
     "pair_whitelist": [
       "BTC/USDT",
       "ETH/USDT",

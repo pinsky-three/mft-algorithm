@@ -3,27 +3,30 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - Optimized v2
-===============================================================
+Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - Final v3
+===========================================================
 
 Optimized scalping strategy for 1m timeframe with fee-adjusted exits.
 - Trades *long-only* on pairs with triple EMA alignment + directional filter
 - Entry: EMA(30) > EMA(120) > EMA(360) on 1m + EMA trend on 15m
 - Volume filter: 1.5x rolling mean (30 periods) for liquidity
 
-Risk / exit management (Fee-optimized)
--------------------------------------
-* Hard stop-loss  : 1 ATR(100) below entry price.
-* Take-profit     : 3 ATR(100) above entry price (covers 0.2% fees).
+Risk / exit management (Final v3)
+---------------------------------
+* Hard stop-loss  : 2.0 ATR(100) below entry price (realistic margin for market noise).
+* Take-profit     : 4.0 ATR(100) above entry price (risk/reward 1:2).
 * Trailing stop   : 1.5 ATR(100) once in profit.
+* Fast exit       : Very large red candle (>0.8 ATR) prevents major reversals.
 * Exit orders     : Market stoploss for better execution.
+* Fees            : Optimized for maker fees (0.02%) vs. taker (0.04%).
 
-Filters & Optimizations
-----------------------
+Filters & Optimizations v2.1 (Balanced)
+---------------------------------------
 1. **Directional filter**: 15m EMAs (30/120) must align with 1m trend
-2. **Volume filter**: 1.5x above 30-period rolling mean  
-3. **ATR multipliers**: 3x/1.5x to overcome fee friction (0.1%+0.1%)
-4. **Market SL**: Faster execution, avoids double fees on limit rejections
+2. **Volume filter**: 1.7x above 30-period rolling mean (balanced opportunity/quality)
+3. **ATR multipliers**: 3x/1.2x balanced for realistic profit vs. fee coverage
+4. **Fast exit**: Very large red candle (>0.8 ATR) prevents major reversals only
+5. **Market SL**: Faster execution, avoids double fees on limit rejections
 
 Back-test commands
 -----------------
@@ -139,8 +142,8 @@ class MultiHorizonMomentum(IStrategy):
             (dataframe["ema_mid"] > dataframe["ema_slow"])
         )
 
-        # Filtro de liquidez (más restrictivo)
-        cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 1.5
+        # Filtro de liquidez (balance liquidez/oportunidades)
+        cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 1.7
 
         # Filtro direccional 15m (evita operar contra micro-tendencia)
         cond_dir = True  # Default en caso de que no haya datos 15m
@@ -162,7 +165,16 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # Exit when fast EMA crosses below mid EMA (momentum lost)
-        exit_cond = qtpylib.crossed_below(dataframe["ema_fast"], dataframe["ema_mid"])
+        exit_ema = qtpylib.crossed_below(dataframe["ema_fast"], dataframe["ema_mid"])
+        
+        # Exit rápido en vela roja muy grande (solo reversiones fuertes)
+        exit_red_candle = (
+            (dataframe['close'] < dataframe['open']) &  # vela roja
+            (dataframe['open'] - dataframe['close']) > dataframe['atr100'] * 0.8  # muy grande (>0.8 ATR)
+        )
+        
+        # Combinar condiciones de salida
+        exit_cond = exit_ema | exit_red_candle
         dataframe.loc[exit_cond, "exit_long"] = 1
         return dataframe
 
@@ -171,7 +183,7 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 1 ATR(100) below entry price."""
+        """Hard SL at 0.8 ATR(100) below entry price - optimized for fees."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
@@ -180,8 +192,9 @@ class MultiHorizonMomentum(IStrategy):
             return 1
         # Price distance to entry
         distance = (trade.open_rate - current_rate)
-        # If price moved more than 1 ATR against us → exit at market
-        if distance >= atr:
+        # SL dinámico a 2.0x ATR (margen realista para market noise)
+        sl_atr = 2.0 * atr
+        if distance >= sl_atr:
             return 0.01  # triggers immediate SL exit
         return 1  # no update
 
@@ -200,7 +213,7 @@ class MultiHorizonMomentum(IStrategy):
             return None
 
         entry = trade.open_rate
-        tp_price = entry + 3 * atr  # 3x ATR para cubrir fees
+        tp_price = entry + 4 * atr  # 4x ATR para R:R 1:2 con SL 2x
         sl_trail = entry + 1.5 * atr  # 1.5x ATR trailing
 
         # Take-profit hit
