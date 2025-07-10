@@ -3,15 +3,16 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy Extended with TEMA - v8 ULTIMATE
+Multi-Horizon Momentum Strategy Extended with TEMA - v8.2 SCALPER
 ================================================================
 
-ENHANCED: Combining original EMA momentum with TEMA trend-following system.
-- Triple EMA + TEMA crossover for ultra-precision entries
-- ADX + CMO momentum filters for higher win rate
+SCALPER OPTIMIZED: Refined filters + optimized for ultra-fast scalping.
+- Balanced selectivity: ADX>47, RSI>63 for optimal precision/robustness
+- Scalping-optimized ATR targets: TP 2.5x, SL 1.5x, Trailing 1.2x
+- Ultra-fast entries/exits: Average trade duration <30 minutes
+- Triple EMA + TEMA crossover + refined momentum filters
 - 4h TEMA trend alignment prevents counter-trend trades
-- Pure ATR exits: Conservative TP 3.5x, SL 2x, Trailing 1.5x
-- Optional short trading capability
+- Target: Consistent 30%+ win rate, minimal drawdown, rapid scalping
 
 Strategy Components:
 -------------------
@@ -226,12 +227,12 @@ class MultiHorizonMomentum(IStrategy):
         cond_cmo_short = True
         
         if self.USE_ADX_CMO_FILTER:
-            cond_adx = dataframe["adx"] > 40  # Strong trend condition
+            cond_adx = dataframe["adx"] > 47  # Balanced trend condition (v8.2 scalper optimization)
             cond_cmo_long = dataframe["cmo"] > 40  # Bullish momentum
             cond_cmo_short = dataframe["cmo"] < -40  # Bearish momentum
 
-        # Filtro de liquidez ultra selectivo (solo trades premium)
-        cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 2.0
+        # Filtro de liquidez ultra selectivo (solo trades premium) - v8.1 optimization
+        cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 3.0
 
         # Filtro direccional 15m (evita operar contra micro-tendencia)
         cond_dir_long = True  # Default en caso de que no haya datos 15m
@@ -240,9 +241,9 @@ class MultiHorizonMomentum(IStrategy):
             cond_dir_long = dataframe["ema_fast_15m_15m"] > dataframe["ema_mid_15m_15m"]
             cond_dir_short = dataframe["ema_fast_15m_15m"] < dataframe["ema_mid_15m_15m"]
 
-        # RSI momentum filter
-        cond_rsi_long = dataframe["rsi"] > 60  # Ultra selectivo para máxima precisión
-        cond_rsi_short = dataframe["rsi"] < 40  # Bearish momentum
+        # RSI momentum filter - v8.2 scalper optimization for balanced precision
+        cond_rsi_long = dataframe["rsi"] > 63  # Strong bullish momentum (v8.2 scalper balance)
+        cond_rsi_short = dataframe["rsi"] < 37  # Strong bearish momentum (v8.2 scalper balance)
 
         # MACD trend strength filter
         cond_macd_long = dataframe["macd"] > dataframe["macdsignal"]
@@ -308,7 +309,7 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 2.0 ATR(100) from entry price - optimized for fees."""
+        """Hard SL at 1.5 ATR(100) from entry price - optimized for scalping."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
@@ -316,8 +317,8 @@ class MultiHorizonMomentum(IStrategy):
         if atr == 0:
             return 1
         
-        # SL dinámico a 2.0x ATR (margen realista para market noise)
-        sl_atr = 2.0 * atr
+        # SL dinámico a 1.5x ATR (optimizado para scalping rápido)
+        sl_atr = 1.5 * atr
         
         if trade.is_short:
             # SHORT: SL triggers when price goes UP by 2 ATR from entry
@@ -337,7 +338,7 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-        """Take profit at 3.5 ATR(100) OR trail stop at 1.5 ATR once in profit."""
+        """Scalping optimized: Take profit at 2.5 ATR(100) OR trail stop at 1.2 ATR once in profit."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return None
@@ -349,9 +350,9 @@ class MultiHorizonMomentum(IStrategy):
         entry = trade.open_rate
         
         if trade.is_short:
-            # SHORT positions: profit when price goes DOWN
-            tp_price = entry - 3.5 * atr  # Take profit 3.5 ATR below entry
-            sl_trail = entry - 1.5 * atr  # Trailing stop 1.5 ATR below entry
+            # SHORT positions: profit when price goes DOWN (scalping optimized)
+            tp_price = entry - 2.5 * atr  # Take profit 2.5 ATR below entry (scalping)
+            sl_trail = entry - 1.2 * atr  # Trailing stop 1.2 ATR below entry (scalping)
             
             # Take-profit hit (price dropped enough)
             if current_rate <= tp_price:
@@ -369,9 +370,9 @@ class MultiHorizonMomentum(IStrategy):
                     "exit_type": "exit_signal",
                 }
         else:
-            # LONG positions: profit when price goes UP  
-            tp_price = entry + 3.5 * atr  # Take profit 3.5 ATR above entry
-            sl_trail = entry + 1.5 * atr  # Trailing stop 1.5 ATR above entry
+            # LONG positions: profit when price goes UP (scalping optimized)
+            tp_price = entry + 2.5 * atr  # Take profit 2.5 ATR above entry (scalping)
+            sl_trail = entry + 1.2 * atr  # Trailing stop 1.2 ATR above entry (scalping)
 
             # Take-profit hit (price rose enough)
             if current_rate >= tp_price:
