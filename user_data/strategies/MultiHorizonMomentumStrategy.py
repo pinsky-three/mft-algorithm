@@ -3,33 +3,32 @@
 # isort: skip_file
 
 """
-Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - BREAKEVEN v7
-==============================================================
+Multi-Horizon Momentum Strategy (BTC / ETH / SOL) - ORIGINAL+ v7.1
+==================================================================
 
-FINAL PUSH: Ultra-selective filters targeting first profitable algorithm.
-- Ultra-precision: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter  
-- Pure ATR exits: Conservative TP 3.5x, SL 2x, Trailing 1.5x
-- v6 baseline: 40.7% win rate, -1.58 USDT (68% loss reduction achieved)
+ORIGINAL STRATEGY with minimal time-based improvement only.
+- ORIGINAL entries: Triple EMA + RSI>60 + MACD + Volume 2.0x + 15m filter  
+- ORIGINAL exits: TP 3.5x, SL 2.0x, Trailing 1.5x + extreme time exit only
+- Target: Match/improve v7 baseline (23.1% win rate, -1.53% return)
 
-Risk / exit management (Final v3)
----------------------------------
-* Hard stop-loss  : 2.0 ATR(100) below entry price (realistic margin for market noise).
-* Take-profit     : 4.0 ATR(100) above entry price (risk/reward 1:2).
-* Trailing stop   : 1.5 ATR(100) once in profit.
-* Fast exit       : Very large red candle (>0.8 ATR) prevents major reversals.
-* Exit orders     : Market stoploss for better execution.
+Risk / exit management (Original+ v7.1)
+---------------------------------------
+* Stop-loss       : 2.0 ATR(100) below entry price (ORIGINAL proven level).
+* Take-profit     : 3.5 ATR(100) above entry price (ORIGINAL proven level).
+* Trailing stop   : 1.5 ATR(100) once in profit (ORIGINAL proven level).
+* Time-based exit : 24h max for losing trades >2% (minimal safety improvement).
 * Fees            : Optimized for maker fees (0.02%) vs. taker (0.04%).
 
-Filters & Optimizations v6 ULTIMATE (Pure ATR)
------------------------------------------------
-1. **Precision entries**: Triple EMA + RSI>55 + MACD bullish + Volume surge
-2. **Directional filter**: 15m EMAs (30/120) alignment prevents counter-trend trades  
-3. **Volume filter**: 1.7x rolling mean + 5min growth for dynamic liquidity
-4. **Pure ATR exits**: TP/SL/Trailing ONLY (47.2% win rate confirmed)
-5. **ALL exit signals ELIMINATED**: EMA, RSI, MACD all toxic in 1m scalping
-6. **Expected performance**: PROFITABLE - no more 0% win rate exit signals
-7. **Risk management**: 2x ATR SL, 4x ATR TP, 1.5x ATR trailing (proven system)
-8. **Execution**: Maker fees optimized, market stoploss for speed
+Filters & Optimizations v7.1 ORIGINAL+
+--------------------------------------
+1. **ORIGINAL entries**: Triple EMA + RSI>60 + MACD + Volume 2.0x surge
+2. **Directional filter**: 15m EMAs alignment prevents counter-trend trades  
+3. **Volume filter**: 2.0x rolling mean (ORIGINAL proven selective level)
+4. **RSI threshold**: 60 (ORIGINAL ultra-selective for maximum precision)
+5. **Volume growth**: pct_change(5) > 0 (ORIGINAL requirement)
+6. **ORIGINAL exits**: 3.5x ATR TP, 2.0x ATR SL, 1.5x ATR trailing
+7. **Minimal safety**: 24h time exit for extreme losing trades only
+8. **Expected performance**: Match v7 baseline (681 trades, 23.1% win rate)
 
 Back-test commands
 -----------------
@@ -154,7 +153,7 @@ class MultiHorizonMomentum(IStrategy):
             (dataframe["ema_mid"] > dataframe["ema_slow"])
         )
 
-        # Filtro de liquidez ultra selectivo (solo trades premium)
+        # Original ultra-selective volume filter (proven level)
         cond_volume = dataframe['volume'] > dataframe['volume'].rolling(30).mean() * 2.0
 
         # Filtro direccional 15m (evita operar contra micro-tendencia)
@@ -162,14 +161,14 @@ class MultiHorizonMomentum(IStrategy):
         if "ema_fast_15m_15m" in dataframe.columns and "ema_mid_15m_15m" in dataframe.columns:
             cond_dir = dataframe["ema_fast_15m_15m"] > dataframe["ema_mid_15m_15m"]
 
-        # RSI momentum filter (solo comprar en momentum alcista)
-        cond_rsi = dataframe["rsi"] > 60  # Ultra selectivo para máxima precisión
+        # ORIGINAL RSI filter (ultra selective - proven)
+        cond_rsi = dataframe["rsi"] > 60  # Original ultra selective for maximum precision
 
         # MACD trend strength filter (MACD por encima de señal)
         cond_macd = dataframe["macd"] > dataframe["macdsignal"]
         
-        # Volume rate of change (liquidez dinámica)
-        cond_volume_roc = dataframe['volume'].pct_change(5) > 0  # volumen creciente últimos 5min
+        # ORIGINAL volume rate of change (liquidez dinámica)
+        cond_volume_roc = dataframe['volume'].pct_change(5) > 0  # Original: volume must be growing
 
         # Optional USDT dominance filter: 7‑day SMA trending **down**
         if self.USE_USDT_FILTER and "usdt_sma7_1d" in dataframe:
@@ -195,7 +194,7 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_stoploss(self, pair: str, trade: Trade, current_time: datetime,
                         current_rate: float, current_profit: float, **kwargs):
-        """Hard SL at 0.8 ATR(100) below entry price - optimized for fees."""
+        """ORIGINAL SL at 2.0 ATR(100) below entry price - proven approach."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return 1  # keep existing SL
@@ -204,7 +203,7 @@ class MultiHorizonMomentum(IStrategy):
             return 1
         # Price distance to entry
         distance = (trade.open_rate - current_rate)
-        # SL dinámico a 2.0x ATR (margen realista para market noise)
+        # ORIGINAL SL at 2.0x ATR (original proven level)
         sl_atr = 2.0 * atr
         if distance >= sl_atr:
             return 0.01  # triggers immediate SL exit
@@ -215,7 +214,7 @@ class MultiHorizonMomentum(IStrategy):
     # ------------------------------------------------------------------
     def custom_exit(self, pair: str, trade: Trade, current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-        """Take profit at 2 ATR(100) OR trail stop at 1 ATR once in profit."""
+        """ORIGINAL exit strategy with minimal time-based improvements."""
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or len(dataframe) == 0:
             return None
@@ -225,20 +224,31 @@ class MultiHorizonMomentum(IStrategy):
             return None
 
         entry = trade.open_rate
-        tp_price = entry + 3.5 * atr  # 3.5x ATR más conservador y alcanzable
-        sl_trail = entry + 1.5 * atr  # 1.5x ATR trailing
+        # ORIGINAL take profit level (3.5x ATR)
+        tp_price = entry + 3.5 * atr  
+        sl_trail = entry + 1.5 * atr  # ORIGINAL trailing level
+        
+        # Time-based management (only for extreme cases)
+        trade_duration = (current_time - trade.open_date).total_seconds() / 3600  # hours
 
-        # Take-profit hit
+        # ORIGINAL take-profit hit
         if current_rate >= tp_price:
             return {
                 "exit_tag": "atr_tp",
                 "exit_type": "exit_signal",
             }
 
-        # Trailing: price went 1 ATR in our favour, but drops back below SL trail
+        # ORIGINAL trailing: price went 1.5 ATR in our favour, but drops back below
         if trade.max_rate is not None and trade.max_rate >= sl_trail and current_rate < sl_trail:
             return {
                 "exit_tag": "atr_trail",
+                "exit_type": "exit_signal",
+            }
+        
+        # MINIMAL time-based improvement: only exit very long losing trades
+        if trade_duration > 24 and current_profit < -0.02:  # 24h + losing >2%
+            return {
+                "exit_tag": "extreme_time",
                 "exit_type": "exit_signal",
             }
 
