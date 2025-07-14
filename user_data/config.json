@@ -51,6 +51,7 @@
     "pair_whitelist": [
       "BTC/USDT",
       "ETH/USDT",
+      "SOL/USDT",
       "ADA/USDT",
       "DOT/USDT",
       "LINK/USDT"

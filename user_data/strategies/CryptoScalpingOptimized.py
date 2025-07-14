@@ -3,27 +3,27 @@
 # isort: skip_file
 
 """
-Crypto Scalping Optimized v8 - ULTRA-AGGRESSIVE FOR 3% MONTHLY 🎯
-================================================================
+Crypto Scalping Optimized v9 - 1-MINUTE TIMEFRAME FOR 3% MONTHLY 🚀
+==================================================================
 
-PERFORMANCE ANALYSIS:
-- Enhanced v7: +0.50% over 6 months (+0.27% in best month)
-- Target: 3% monthly (need 11x improvement even in best month!)
-- Current: 0.08% monthly average → Need 3% monthly
+MULTI-PAIR ANALYSIS RESULTS:
+- Multi-pair (BTC+ETH+SOL): 65 trades, -0.44% (WORSE than single BTC)
+- Single BTC: 14 trades, +0.38%
+- Crypto correlation limits diversification benefits
 
-🎯 ULTRA-AGGRESSIVE STRATEGY FOR 3% MONTHLY:
-- MAXIMUM ROI targets: 3.0%/2.5%/2.0% (vs 2.0%/1.5%/1.0%)
-- ULTRA-PREMIUM filters: Only absolute best setups
-- MAXIMUM momentum/volume requirements
-- AGGRESSIVE but controlled risk management
+🎯 1-MINUTE TIMEFRAME STRATEGY:
+- 5x more trading opportunities (1m vs 5m)
+- Faster profit realization with same ROI targets
+- More frequent volume spikes and momentum setups
+- Same ultra-premium filters but more frequent signals
 
-💡 ULTRA-OPTIMIZATION APPROACH:
-- ROI ladder: 3.0%/2.5%/2.0% (3x higher than v7)
-- Ultra-tight entry filters (top 1% setups only)  
-- Maximum momentum (85%+) and volume (2.5x+)
-- Shortest time to profit (10min/30min targets)
+💡 1M OPTIMIZATION APPROACH:
+- ROI ladder: 3.0%/2.5%/2.0% (same targets, faster execution)
+- Time-based: 2min/6min/12min (vs 10min/30min on 5m)
+- Same ultra-premium filters (proven quality gates)
+- Target: 5x more trades = 5x more profit potential
 
-🏆 MISSION: ACHIEVE 3% MONTHLY OR BUST!
+🏆 MISSION: 1M TIMEFRAME = 3% MONTHLY TARGET!
 """
 
 from datetime import datetime, timedelta
@@ -40,39 +40,39 @@ from freqtrade.strategy import IStrategy, merge_informative_pair
 
 class CryptoScalpingOptimized(IStrategy):
     """
-    ULTRA-AGGRESSIVE FOR 3% MONTHLY: Maximum ROI + Ultra-Premium Setups
+    1-MINUTE TIMEFRAME FOR 3% MONTHLY: 5x Opportunities + Ultra-Premium Setups
     Monthly target: +3% = 36% annual compound growth
-    Ultra-aggressive ROI targets with ultra-premium quality filters
+    1m timeframe with ultra-aggressive ROI targets and ultra-premium quality filters
     """
 
     INTERFACE_VERSION = 3
-    timeframe: str = "5m"
+    timeframe: str = "1m"  # 5m → 1m (5x more opportunities)
     can_short: bool = False
     startup_candle_count: int = 300
 
-    # === ULTRA-AGGRESSIVE ROI LADDER FOR 3% MONTHLY ===
+    # === 1M ULTRA-AGGRESSIVE ROI LADDER FOR 3% MONTHLY ===
     minimal_roi: Dict[str, float] = {
-        "0": 0.030,     # 3.0% immediate (vs 2.0%)
-        "10": 0.025,    # 2.5% after 10 min (vs 1.5% at 20min)
-        "30": 0.020     # 2.0% after 30 min (vs 1.0% at 1h)
+        "0": 0.030,     # 3.0% immediate
+        "2": 0.025,     # 2.5% after 2 min (vs 10min on 5m)
+        "6": 0.020      # 2.0% after 6 min (vs 30min on 5m)
     }
     
     # === ULTRA-TIGHT STOPLOSS (Maximum Risk Control) ===
-    stoploss: float = -0.04  # 4% vs 6% (ultra-tight)
+    stoploss: float = -0.04  # 4% (same tight control)
     trailing_stop = False
     
-    # === ULTRA-PREMIUM ENTRY PARAMETERS (Top 1% Setups Only) ===
-    MIN_VOLUME_RATIO = 2.5       # 1.8 → 2.5 (massive volume confirmation)
-    RSI_THRESHOLD = 65           # 55 → 65 (very strong momentum)
-    LEVEL_PROXIMITY = 0.005      # 0.8% → 0.5% (ultra-tight levels)
-    MOMENTUM_STRENGTH = 0.85     # 0.75 → 0.85 (ultra-strong momentum)
-    MIN_ATR_RATIO = 0.0025       # 0.2% → 0.25% (ultra-volatile moves)
+    # === SAME ULTRA-PREMIUM ENTRY PARAMETERS (Proven Quality) ===
+    MIN_VOLUME_RATIO = 2.5       # Massive volume confirmation
+    RSI_THRESHOLD = 65           # Very strong momentum
+    LEVEL_PROXIMITY = 0.005      # Ultra-tight levels
+    MOMENTUM_STRENGTH = 0.85     # Ultra-strong momentum
+    MIN_ATR_RATIO = 0.0025       # Ultra-volatile moves
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []
         if self.dp and self.dp.current_whitelist():
             for pair in self.dp.current_whitelist():
-                pairs.append((pair, "15m"))
+                pairs.append((pair, "15m"))  # Keep 15m for trend context
         return pairs
 
 
@@ -296,34 +296,34 @@ class CryptoScalpingOptimized(IStrategy):
     # === NO CUSTOM EXIT LOGIC - ULTRA-AGGRESSIVE ROI-ONLY ===
     # Ultra-aggressive ROI ladder does all the work with maximum profit targets
 
-# === ULTRA-AGGRESSIVE STRATEGY TARGETS FOR 3% MONTHLY ===
+# === 1-MINUTE TIMEFRAME STRATEGY TARGETS FOR 3% MONTHLY ===
 """
-🎯 ULTRA-AGGRESSIVE STRATEGY FOR 3% MONTHLY RETURNS:
+🎯 1-MINUTE TIMEFRAME STRATEGY FOR 3% MONTHLY RETURNS:
 
-CURRENT PERFORMANCE ANALYSIS:
-- Enhanced v7: +0.50% over 6 months (+0.27% in best month)
-- Target: 3% monthly (need 11x improvement!)
-- Ultra-aggressive approach required
+MULTI-PAIR ANALYSIS LESSONS:
+- Multi-pair failed: -0.44% (worse than single BTC +0.38%)
+- Crypto correlation limits diversification benefits
+- Ultra-aggressive filtering too restrictive even with 3 pairs
 
-ULTRA-OPTIMIZATION APPROACH:
-1. MAXIMUM ROI targets: 3.0%/2.5%/2.0% (3x higher than v7)
-2. Ultra-premium quality: Top 1% setups only
-3. MASSIVE volume confirmation: 2.5x-3.0x average
-4. Ultra-fast profit taking: 10min/30min vs 20min/60min
+1-MINUTE TIMEFRAME ADVANTAGES:
+1. 5x MORE OPPORTUNITIES: 1m vs 5m = 5x more candles
+2. FASTER EXECUTION: ROI targets hit in 2-6 min vs 10-30 min
+3. MORE VOLUME SPIKES: Higher frequency momentum detection
+4. SAME QUALITY: Ultra-premium filters maintain edge
 
 🏆 EXPECTED RESULTS:
-- Very few but ultra-high quality trades
-- MAXIMUM profit per trade (target 2-3% avg)
-- Ultra-fast profit realization (10-30 min)
-- Target: 3% monthly = 36% annual compound
+- 5x more trades: ~70 trades vs 14 (5x multiplier)
+- Same quality: Ultra-premium filters maintained
+- Faster profits: 2-6 min vs 10-30 min execution
+- Target: 5x trades × 0.38% = 1.9% monthly (close to 3%!)
 
-📊 ULTRA-SUCCESS METRICS:
-✅ 3% monthly return target (minimum requirement)
-✅ Ultra-high profit per trade (target 2-3% avg)
-✅ Ultra-fast execution (10-30 min trades)
-✅ Maximum quality filtering (top 1% setups)
-✅ Ultra-controlled risk (4% stoploss)
+📊 1M SUCCESS METRICS:
+✅ 60+ trades monthly (5x increase)
+✅ Ultra-fast execution (2-6 min trades)  
+✅ 1.5-3% monthly return (realistic target)
+✅ Same risk control (4% stoploss)
+✅ Ultra-premium quality maintained
 
-🏆 MISSION: 3% MONTHLY OR BUST!
-Ultra-aggressive approach for maximum monthly returns!
+🏆 MISSION: 1M TIMEFRAME = BREAKTHROUGH TO 3% MONTHLY!
+1-minute scalping = maximum opportunities + premium quality!
 """ 
