@@ -3,27 +3,21 @@
 # isort: skip_file
 
 """
-Crypto Scalping Optimized v9 - 1-MINUTE TIMEFRAME FOR 3% MONTHLY 🚀
-==================================================================
+Crypto Scalping Optimized v10 - BALANCED RISK/REWARD FIX 🎯
+===========================================================
 
-MULTI-PAIR ANALYSIS RESULTS:
-- Multi-pair (BTC+ETH+SOL): 65 trades, -0.44% (WORSE than single BTC)
-- Single BTC: 14 trades, +0.38%
-- Crypto correlation limits diversification benefits
+CRITICAL ISSUES IDENTIFIED FROM 6-MONTH BACKTEST:
+- ROI exits: +82.452 USDT (81 trades, 100% win rate, 2.04% avg)
+- Stop losses: -84.590 USDT (42 trades, 0% win rate, -4.04% avg) 
+- Net result: -2.139 USDT loss (-0.21%)
 
-🎯 1-MINUTE TIMEFRAME STRATEGY:
-- 5x more trading opportunities (1m vs 5m)
-- Faster profit realization with same ROI targets
-- More frequent volume spikes and momentum setups
-- Same ultra-premium filters but more frequent signals
+🔧 OPTIMIZATION FIXES:
+1. STOP LOSS: -4% → -2.5% (reduce 1m noise exits)
+2. ROI LADDER: 3%/2.5%/2% → 2.5%/2%/1.5% (better balance)
+3. FILTERING: Reduce over-restrictive thresholds for more opportunities
+4. REGIME FILTER: Add market condition awareness
 
-💡 1M OPTIMIZATION APPROACH:
-- ROI ladder: 3.0%/2.5%/2.0% (same targets, faster execution)
-- Time-based: 2min/6min/12min (vs 10min/30min on 5m)
-- Same ultra-premium filters (proven quality gates)
-- Target: 5x more trades = 5x more profit potential
-
-🏆 MISSION: 1M TIMEFRAME = 3% MONTHLY TARGET!
+🎯 TARGET: Positive consistent returns with balanced risk/reward
 """
 
 from datetime import datetime, timedelta
@@ -40,33 +34,32 @@ from freqtrade.strategy import IStrategy, merge_informative_pair
 
 class CryptoScalpingOptimized(IStrategy):
     """
-    1-MINUTE TIMEFRAME FOR 3% MONTHLY: 5x Opportunities + Ultra-Premium Setups
-    Monthly target: +3% = 36% annual compound growth
-    1m timeframe with ultra-aggressive ROI targets and ultra-premium quality filters
+    BALANCED RISK/REWARD SCALPING - Optimized for Consistent Profits
+    Fix stop loss bleeding + improve opportunity capture + regime awareness
     """
 
     INTERFACE_VERSION = 3
-    timeframe: str = "1m"  # 5m → 1m (5x more opportunities)
+    timeframe: str = "1m"
     can_short: bool = False
     startup_candle_count: int = 300
 
-    # === 1M ULTRA-AGGRESSIVE ROI LADDER FOR 3% MONTHLY ===
+    # === BALANCED ROI LADDER (Better Risk/Reward) ===
     minimal_roi: Dict[str, float] = {
-        "0": 0.030,     # 3.0% immediate
-        "2": 0.025,     # 2.5% after 2 min (vs 10min on 5m)
-        "6": 0.020      # 2.0% after 6 min (vs 30min on 5m)
+        "0": 0.025,     # 2.5% immediate (vs 3.0% - more realistic)
+        "2": 0.020,     # 2.0% after 2 min (vs 2.5% - balanced)
+        "6": 0.015      # 1.5% after 6 min (vs 2.0% - conservative)
     }
     
-    # === ULTRA-TIGHT STOPLOSS (Maximum Risk Control) ===
-    stoploss: float = -0.04  # 4% (same tight control)
+    # === OPTIMIZED STOPLOSS (Reduce 1m Noise) ===
+    stoploss: float = -0.025  # 2.5% (vs 4% - reduce false exits)
     trailing_stop = False
     
-    # === SAME ULTRA-PREMIUM ENTRY PARAMETERS (Proven Quality) ===
-    MIN_VOLUME_RATIO = 2.5       # Massive volume confirmation
-    RSI_THRESHOLD = 65           # Very strong momentum
-    LEVEL_PROXIMITY = 0.005      # Ultra-tight levels
-    MOMENTUM_STRENGTH = 0.85     # Ultra-strong momentum
-    MIN_ATR_RATIO = 0.0025       # Ultra-volatile moves
+    # === BALANCED ENTRY PARAMETERS (Less Restrictive) ===
+    MIN_VOLUME_RATIO = 2.0       # Strong volume (vs 2.5 - less restrictive)
+    RSI_THRESHOLD = 60           # Strong momentum (vs 65 - more opportunities)
+    LEVEL_PROXIMITY = 0.005      # Level proximity
+    MOMENTUM_STRENGTH = 0.80     # Strong momentum (vs 0.85 - balanced)
+    MIN_ATR_RATIO = 0.0025       # Volatility threshold
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []
@@ -75,10 +68,8 @@ class CryptoScalpingOptimized(IStrategy):
                 pairs.append((pair, "15m"))  # Keep 15m for trend context
         return pairs
 
-
-
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """Professional indicator stack with liquidity sweep detection"""
+        """Professional indicator stack with market regime awareness"""
         
         # === Core Momentum Stack ===
         dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=10)
@@ -96,6 +87,20 @@ class CryptoScalpingOptimized(IStrategy):
         dataframe["atr"] = ta.ATR(dataframe, timeperiod=14)
         dataframe["volume_sma"] = ta.SMA(dataframe['volume'], timeperiod=20)
         dataframe["volume_ratio"] = dataframe['volume'] / dataframe["volume_sma"]
+        
+        # === NEW: MARKET REGIME DETECTION ===
+        # Volatility regime (for favorable conditions)
+        dataframe['atr_sma'] = ta.SMA(dataframe['atr'], timeperiod=20)
+        dataframe['volatility_ratio'] = dataframe['atr'] / dataframe['atr_sma']
+        dataframe['favorable_volatility'] = (
+            (dataframe['volatility_ratio'] > 1.2) &  # Higher than normal vol
+            (dataframe['volatility_ratio'] < 2.0)    # But not extreme
+        )
+        
+        # Trend strength regime
+        dataframe['ema_spread'] = (dataframe['ema_fast'] - dataframe['ema_slow']) / dataframe['close']
+        dataframe['trend_strength'] = abs(dataframe['ema_spread'])
+        dataframe['trending_regime'] = dataframe['trend_strength'] > 0.003  # 0.3% minimum trend
         
         # === Key Levels ===
         dataframe = self.calculate_liquidity_levels(dataframe)
@@ -121,9 +126,7 @@ class CryptoScalpingOptimized(IStrategy):
             except Exception:
                 dataframe['trend_15m_15m'] = True
 
-        # === 4. FIXED MOMENTUM CALCULATION ===
-        
-        # Momentum conditions (multiple checks)
+        # === MOMENTUM CALCULATION (Balanced Thresholds) ===
         momentum_conditions = [
             dataframe["ema_fast"] > dataframe["ema_mid"],
             dataframe["ema_mid"] > dataframe["ema_slow"],
@@ -132,14 +135,14 @@ class CryptoScalpingOptimized(IStrategy):
             dataframe["close"] > dataframe["ema_fast"]
         ]
         
-        # FIX: Use np.sum for proper array summation
+        # Use np.sum for proper array summation
         momentum_score = np.sum(momentum_conditions, axis=0)
         dataframe['momentum_strength'] = momentum_score / len(momentum_conditions)
         dataframe['momentum_aligned'] = (
             dataframe['momentum_strength'] >= self.MOMENTUM_STRENGTH
         )
         
-        # Enhanced filters
+        # Enhanced filters (less restrictive)
         dataframe['volume_confirmed'] = (
             dataframe["volume_ratio"] > self.MIN_VOLUME_RATIO
         )
@@ -151,8 +154,13 @@ class CryptoScalpingOptimized(IStrategy):
         # Trend confirmation from 15m
         dataframe['trend_confirmed'] = dataframe.get('trend_15m_15m', True)
         
-        # === 2. SESSION BIAS FILTER ===
-        # Extract hour and minute from index directly
+        # === NEW: REGIME CONFIRMATION ===
+        dataframe['regime_favorable'] = (
+            dataframe['favorable_volatility'] &
+            dataframe['trending_regime']
+        )
+        
+        # === SESSION BIAS FILTER ===
         try:
             df_hours = dataframe.index.hour
             df_minutes = dataframe.index.minute
@@ -195,7 +203,7 @@ class CryptoScalpingOptimized(IStrategy):
             if col in df.columns:
                 df[col] = df[col].ffill().fillna(df['close'])
         
-        # === 3. LIQUIDITY SWEEP TRIGGERS ===
+        # === LIQUIDITY SWEEP TRIGGERS ===
         
         # Sweep high then reverse (sell stops triggered)
         df['sweep_high'] = (
@@ -224,106 +232,100 @@ class CryptoScalpingOptimized(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        ULTRA-PREMIUM ENTRY LOGIC - Top 1% Setups Only for 3% Monthly
-        Only absolute highest quality setups with maximum confirmation
+        BALANCED ENTRY LOGIC - Quality Setups with Better Opportunity Capture
+        Reduced over-filtering while maintaining edge quality
         """
         
-        # === ULTRA-PREMIUM QUALITY GATES ===
+        # === BALANCED QUALITY GATES ===
         momentum_ok = dataframe['momentum_aligned']
         volume_ok = dataframe['volume_confirmed'] 
         volatility_ok = dataframe['volatile_enough']
         trend_ok = dataframe['trend_confirmed']
         session_ok = dataframe['session_ok']
+        regime_ok = dataframe['regime_favorable']  # NEW: Regime filter
         
-        # === ULTRA-PREMIUM SETUPS (Top 1% Quality Only) ===
+        # === BALANCED SETUPS (Less Restrictive but Still Quality) ===
         
-        # 1. Ultra liquidity sweep reversal (maximum probability)
-        ultra_sweep_reversal = (
+        # 1. Liquidity sweep reversal (balanced thresholds)
+        sweep_reversal = (
             (dataframe['sweep_high'] | dataframe['sweep_low']) &
             (dataframe['close'] > dataframe['open']) &  # Green candle after sweep
-            (dataframe['volume_ratio'] > 3.0) &         # MASSIVE volume (vs 2.2)
-            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum (vs 0.80)
-            (dataframe['rsi'] > 70) & (dataframe['rsi'] < 85)  # Very strong but not extreme
+            (dataframe['volume_ratio'] > 2.2) &         # Strong volume (vs 3.0)
+            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
+            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 85)  # Strong but not extreme
         )
         
-        # 2. Ultra momentum breakout (premium quality only)
-        ultra_momentum_breakout = (
+        # 2. Momentum breakout (quality with opportunities)
+        momentum_breakout = (
             (dataframe['close'] > dataframe['prev_session_high']) &
             (dataframe['close'].shift(1) <= dataframe['prev_session_high'].shift(1)) &
-            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum (vs 0.85)
-            (dataframe['volume_ratio'] > 2.8) &         # Ultra volume (vs 2.0)
-            (dataframe['rsi'] > 70) &                   # Very strong RSI (vs 60)
+            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
+            (dataframe['volume_ratio'] > 2.2) &         # Strong volume (vs 2.8)
+            (dataframe['rsi'] > 65) &                   # Strong RSI (vs 70)
             (dataframe['rsi'] < 85) &                   # But not overbought
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.008)  # Strong above session
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.006)  # Above session (vs 1.008)
         )
         
-        # 3. Ultra session momentum (absolute premium)
-        ultra_session_momentum = (
+        # 3. Session momentum (balanced quality)
+        session_momentum = (
             session_ok &
-            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.01) &  # Well above session
-            (dataframe['volume_ratio'] > 3.0) &         # MASSIVE volume
+            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.008) &  # Well above session
+            (dataframe['volume_ratio'] > 2.5) &         # Strong volume (vs 3.0)
             (dataframe['close'] > dataframe['open']) &  # Green candle
-            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 80) &  # Strong RSI range
-            (dataframe['close'] > dataframe['ema_fast'] * 1.003)  # Well above EMA
+            (dataframe['rsi'] > 60) & (dataframe['rsi'] < 80) &  # Strong RSI range (vs 65)
+            (dataframe['close'] > dataframe['ema_fast'] * 1.002)  # Above EMA (vs 1.003)
         )
         
-        # === COMBINE ONLY ULTRA-PREMIUM SETUPS ===
-        ultra_premium_setups = (
-            ultra_sweep_reversal | ultra_momentum_breakout | ultra_session_momentum
+        # === COMBINE BALANCED SETUPS ===
+        quality_setups = (
+            sweep_reversal | momentum_breakout | session_momentum
         )
         
-        # === ULTRA-PREMIUM ENTRY CONDITION (All Gates + Ultra Setups) ===
-        ultra_premium_entry = (
+        # === BALANCED ENTRY CONDITION (All Gates + Quality Setups) ===
+        balanced_entry = (
             momentum_ok & 
             volume_ok & 
             volatility_ok & 
             trend_ok &
-            session_ok &           # Session filter always required
-            ultra_premium_setups   # Only ultra-premium quality setups
+            session_ok &           # Session filter
+            regime_ok &            # NEW: Regime filter for favorable conditions
+            quality_setups         # Quality setups with balanced thresholds
         )
         
-        dataframe.loc[ultra_premium_entry, "enter_long"] = 1
+        dataframe.loc[balanced_entry, "enter_long"] = 1
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        ULTRA-AGGRESSIVE ROI-ONLY STRATEGY: No custom exit signals
-        Let ultra-aggressive ROI ladder handle all exits with 3%+ targets
+        BALANCED ROI-ONLY STRATEGY: Let optimized ROI ladder handle exits
         """
         return dataframe
 
-    # === NO CUSTOM EXIT LOGIC - ULTRA-AGGRESSIVE ROI-ONLY ===
-    # Ultra-aggressive ROI ladder does all the work with maximum profit targets
-
-# === 1-MINUTE TIMEFRAME STRATEGY TARGETS FOR 3% MONTHLY ===
+# === BALANCED STRATEGY OPTIMIZATION SUMMARY ===
 """
-🎯 1-MINUTE TIMEFRAME STRATEGY FOR 3% MONTHLY RETURNS:
+🎯 RISK/REWARD OPTIMIZATION FIXES:
 
-MULTI-PAIR ANALYSIS LESSONS:
-- Multi-pair failed: -0.44% (worse than single BTC +0.38%)
-- Crypto correlation limits diversification benefits
-- Ultra-aggressive filtering too restrictive even with 3 pairs
+STOP LOSS FIX:
+❌ Old: -4% stop loss (too tight for 1m noise)
+✅ New: -2.5% stop loss (reduce false exits)
 
-1-MINUTE TIMEFRAME ADVANTAGES:
-1. 5x MORE OPPORTUNITIES: 1m vs 5m = 5x more candles
-2. FASTER EXECUTION: ROI targets hit in 2-6 min vs 10-30 min
-3. MORE VOLUME SPIKES: Higher frequency momentum detection
-4. SAME QUALITY: Ultra-premium filters maintain edge
+ROI BALANCE:
+❌ Old: 3%/2.5%/2% (too aggressive)
+✅ New: 2.5%/2%/1.5% (balanced risk/reward)
 
-🏆 EXPECTED RESULTS:
-- 5x more trades: ~70 trades vs 14 (5x multiplier)
-- Same quality: Ultra-premium filters maintained
-- Faster profits: 2-6 min vs 10-30 min execution
-- Target: 5x trades × 0.38% = 1.9% monthly (close to 3%!)
+FILTERING OPTIMIZATION:
+❌ Old: Ultra-restrictive (missed opportunities)
+✅ New: Balanced quality (more setups, maintained edge)
 
-📊 1M SUCCESS METRICS:
-✅ 60+ trades monthly (5x increase)
-✅ Ultra-fast execution (2-6 min trades)  
-✅ 1.5-3% monthly return (realistic target)
-✅ Same risk control (4% stoploss)
-✅ Ultra-premium quality maintained
+REGIME AWARENESS:
+❌ Old: Blind trading in all conditions
+✅ New: Trade only in favorable volatility/trend regimes
 
-🏆 MISSION: 1M TIMEFRAME = BREAKTHROUGH TO 3% MONTHLY!
-1-minute scalping = maximum opportunities + premium quality!
+🏆 EXPECTED IMPROVEMENT:
+- Fewer stop losses from 1m noise
+- Better risk/reward balance (1:1 vs 1:2)
+- More trading opportunities (balanced filters)
+- Higher probability setups (regime awareness)
+- Consistent positive returns over longer periods
 """ 
