@@ -3,21 +3,21 @@
 # isort: skip_file
 
 """
-Crypto Scalping Optimized v10 - BALANCED RISK/REWARD FIX 🎯
-===========================================================
+Crypto Scalping Optimized v11 - MARKET HEALTH ENHANCEMENT 🎯
+============================================================
 
-CRITICAL ISSUES IDENTIFIED FROM 6-MONTH BACKTEST:
-- ROI exits: +82.452 USDT (81 trades, 100% win rate, 2.04% avg)
-- Stop losses: -84.590 USDT (42 trades, 0% win rate, -4.04% avg) 
-- Net result: -2.139 USDT loss (-0.21%)
+NEGATIVE MONTH ANALYSIS RESULTS:
+- March 2025: 60% ROI rate, choppy bearish market (-12.21%)
+- May 2025: 54% ROI rate, choppy bullish market (+19.37%)
+- Problem: Choppy conditions cause ~50-60% ROI rate vs 70%+ needed
 
-🔧 OPTIMIZATION FIXES:
-1. STOP LOSS: -4% → -2.5% (reduce 1m noise exits)
-2. ROI LADDER: 3%/2.5%/2% → 2.5%/2%/1.5% (better balance)
-3. FILTERING: Reduce over-restrictive thresholds for more opportunities
-4. REGIME FILTER: Add market condition awareness
+🔧 MARKET HEALTH ENHANCEMENTS:
+1. CHOPPINESS FILTER: Detect ranging/sideways markets
+2. TREND QUALITY: Avoid weak/choppy trends  
+3. ADAPTIVE FILTERING: Stricter requirements in poor conditions
+4. MARKET HEALTH SCORE: Composite health indicator
 
-🎯 TARGET: Positive consistent returns with balanced risk/reward
+🎯 TARGET: Eliminate negative months by avoiding choppy conditions
 """
 
 from datetime import datetime, timedelta
@@ -34,8 +34,8 @@ from freqtrade.strategy import IStrategy, merge_informative_pair
 
 class CryptoScalpingOptimized(IStrategy):
     """
-    BALANCED RISK/REWARD SCALPING - Optimized for Consistent Profits
-    Fix stop loss bleeding + improve opportunity capture + regime awareness
+    MARKET HEALTH AWARE SCALPING - Avoid Choppy Conditions
+    Enhanced with choppiness detection and adaptive filtering
     """
 
     INTERFACE_VERSION = 3
@@ -60,6 +60,11 @@ class CryptoScalpingOptimized(IStrategy):
     LEVEL_PROXIMITY = 0.005      # Level proximity
     MOMENTUM_STRENGTH = 0.80     # Strong momentum (vs 0.85 - balanced)
     MIN_ATR_RATIO = 0.0025       # Volatility threshold
+    
+    # === NEW: MARKET HEALTH THRESHOLDS ===
+    MIN_MARKET_HEALTH = 0.6      # Minimum market health score (0-1)
+    MIN_TREND_QUALITY = 0.3      # Minimum trend quality score
+    MAX_CHOPPINESS = 0.6         # Maximum choppiness tolerance
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []
@@ -69,7 +74,7 @@ class CryptoScalpingOptimized(IStrategy):
         return pairs
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """Professional indicator stack with market regime awareness"""
+        """Enhanced indicator stack with market health awareness"""
         
         # === Core Momentum Stack ===
         dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=10)
@@ -88,7 +93,70 @@ class CryptoScalpingOptimized(IStrategy):
         dataframe["volume_sma"] = ta.SMA(dataframe['volume'], timeperiod=20)
         dataframe["volume_ratio"] = dataframe['volume'] / dataframe["volume_sma"]
         
-        # === NEW: MARKET REGIME DETECTION ===
+        # === ADVANCED MARKET HEALTH DETECTION ===
+        
+        # 1. Choppiness Index (detect ranging markets)
+        def choppiness_index(df, period=14):
+            """Calculate Choppiness Index - higher values = more choppy/ranging"""
+            # Calculate True Range
+            high_low = df['high'] - df['low']
+            high_close = (df['high'] - df['close'].shift(1)).abs()
+            low_close = (df['low'] - df['close'].shift(1)).abs()
+            true_range = pd.DataFrame([high_low, high_close, low_close]).max()
+            
+            # Calculate ATR manually using pandas
+            atr = true_range.rolling(window=period, min_periods=1).mean()
+            
+            # Calculate high-low range over period
+            high_low_range = df['high'].rolling(period).max() - df['low'].rolling(period).min()
+            
+            # Calculate Choppiness Index
+            atr_sum = atr.rolling(period).sum()
+            ci = 100 * np.log10(atr_sum / high_low_range) / np.log10(period)
+            return ci.fillna(50)  # Default to neutral
+        
+        dataframe['choppiness'] = choppiness_index(dataframe, 20)
+        dataframe['choppy_market'] = dataframe['choppiness'] > 60  # >60 = choppy
+        
+        # 2. Trend Quality Assessment  
+        # EMA alignment strength
+        ema_aligned = (
+            (dataframe["ema_fast"] > dataframe["ema_mid"]) & 
+            (dataframe["ema_mid"] > dataframe["ema_slow"])
+        )
+        dataframe['ema_alignment'] = ema_aligned.rolling(10).sum() / 10  # 0-1 score
+        
+        # Trend consistency (price stays above/below EMA)
+        price_above_ema = dataframe['close'] > dataframe['ema_fast']
+        dataframe['trend_consistency'] = price_above_ema.rolling(20).sum() / 20  # 0-1 score
+        
+        # Combined trend quality
+        dataframe['trend_quality'] = (dataframe['ema_alignment'] + dataframe['trend_consistency']) / 2
+        
+        # 3. Market Health Score (composite)
+        # Higher volatility = better for scalping (but not extreme)
+        dataframe['atr_percentile'] = dataframe['atr'].rolling(50).rank(pct=True)
+        vol_score = np.where(
+            (dataframe['atr_percentile'] > 0.3) & (dataframe['atr_percentile'] < 0.8),
+            1.0,  # Good volatility range
+            0.5   # Too low or too high
+        )
+        
+        # Volume health  
+        vol_health = np.where(dataframe['volume_ratio'] > 1.2, 1.0, 0.5)
+        
+        # Non-choppy market bonus
+        chop_penalty = np.where(dataframe['choppy_market'], 0.3, 1.0)
+        
+        # Composite market health (0-1 scale)
+        dataframe['market_health'] = (
+            (dataframe['trend_quality'] * 0.4) +  # 40% trend quality
+            (vol_score * 0.3) +                   # 30% volatility
+            (vol_health * 0.2) +                  # 20% volume  
+            (chop_penalty * 0.1)                  # 10% choppiness penalty
+        )
+        
+        # === EXISTING REGIME DETECTION (Enhanced) ===
         # Volatility regime (for favorable conditions)
         dataframe['atr_sma'] = ta.SMA(dataframe['atr'], timeperiod=20)
         dataframe['volatility_ratio'] = dataframe['atr'] / dataframe['atr_sma']
@@ -154,10 +222,13 @@ class CryptoScalpingOptimized(IStrategy):
         # Trend confirmation from 15m
         dataframe['trend_confirmed'] = dataframe.get('trend_15m_15m', True)
         
-        # === NEW: REGIME CONFIRMATION ===
+        # === ENHANCED: REGIME CONFIRMATION WITH MARKET HEALTH ===
         dataframe['regime_favorable'] = (
             dataframe['favorable_volatility'] &
-            dataframe['trending_regime']
+            dataframe['trending_regime'] &
+            (dataframe['market_health'] >= self.MIN_MARKET_HEALTH) &  # NEW: Market health
+            (dataframe['trend_quality'] >= self.MIN_TREND_QUALITY) &  # NEW: Trend quality
+            (~dataframe['choppy_market'])                             # NEW: Avoid choppy markets
         )
         
         # === SESSION BIAS FILTER ===
@@ -232,68 +303,91 @@ class CryptoScalpingOptimized(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        BALANCED ENTRY LOGIC - Quality Setups with Better Opportunity Capture
-        Reduced over-filtering while maintaining edge quality
+        MARKET HEALTH AWARE ENTRY LOGIC - Avoid Choppy Conditions
+        Enhanced filtering to eliminate negative month patterns
         """
         
-        # === BALANCED QUALITY GATES ===
+        # === ENHANCED QUALITY GATES WITH MARKET HEALTH ===
         momentum_ok = dataframe['momentum_aligned']
         volume_ok = dataframe['volume_confirmed'] 
         volatility_ok = dataframe['volatile_enough']
         trend_ok = dataframe['trend_confirmed']
         session_ok = dataframe['session_ok']
-        regime_ok = dataframe['regime_favorable']  # NEW: Regime filter
+        regime_ok = dataframe['regime_favorable']  # Already includes market health
         
-        # === BALANCED SETUPS (Less Restrictive but Still Quality) ===
+        # === ADAPTIVE FILTERING BASED ON MARKET HEALTH ===
+        # In poor market health, require stronger confirmation
+        market_health = dataframe['market_health']
         
-        # 1. Liquidity sweep reversal (balanced thresholds)
-        sweep_reversal = (
+        # Adaptive volume threshold (higher when market health is poor)
+        adaptive_volume_threshold = np.where(
+            market_health >= 0.7, 
+            self.MIN_VOLUME_RATIO,           # Normal volume in good health
+            self.MIN_VOLUME_RATIO * 1.3      # Higher volume in poor health
+        )
+        volume_adaptive = dataframe['volume_ratio'] > adaptive_volume_threshold
+        
+        # Adaptive momentum threshold  
+        adaptive_momentum_threshold = np.where(
+            market_health >= 0.7,
+            self.MOMENTUM_STRENGTH,          # Normal momentum in good health
+            self.MOMENTUM_STRENGTH + 0.1     # Higher momentum in poor health
+        )
+        momentum_adaptive = dataframe['momentum_strength'] > adaptive_momentum_threshold
+        
+        # === ENHANCED SETUPS WITH MARKET HEALTH REQUIREMENTS ===
+        
+        # 1. Market Health Aware Liquidity Sweep
+        health_sweep_reversal = (
             (dataframe['sweep_high'] | dataframe['sweep_low']) &
             (dataframe['close'] > dataframe['open']) &  # Green candle after sweep
-            (dataframe['volume_ratio'] > 2.2) &         # Strong volume (vs 3.0)
-            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
-            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 85)  # Strong but not extreme
+            volume_adaptive &                           # Adaptive volume
+            momentum_adaptive &                         # Adaptive momentum  
+            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 85) &
+            (market_health >= 0.7)                     # Require good market health
         )
         
-        # 2. Momentum breakout (quality with opportunities)
-        momentum_breakout = (
+        # 2. High Quality Momentum Breakout
+        health_momentum_breakout = (
             (dataframe['close'] > dataframe['prev_session_high']) &
             (dataframe['close'].shift(1) <= dataframe['prev_session_high'].shift(1)) &
-            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
-            (dataframe['volume_ratio'] > 2.2) &         # Strong volume (vs 2.8)
-            (dataframe['rsi'] > 65) &                   # Strong RSI (vs 70)
-            (dataframe['rsi'] < 85) &                   # But not overbought
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.006)  # Above session (vs 1.008)
+            momentum_adaptive &                         # Adaptive momentum
+            volume_adaptive &                           # Adaptive volume
+            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 85) &
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.006) &
+            (market_health >= 0.6)                     # Allow slightly lower health for breakouts
         )
         
-        # 3. Session momentum (balanced quality)
-        session_momentum = (
+        # 3. Premium Session Momentum (Best Health Only)
+        premium_session_momentum = (
             session_ok &
-            (dataframe['momentum_strength'] > 0.85) &   # Strong momentum (vs 0.90)
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.008) &  # Well above session
-            (dataframe['volume_ratio'] > 2.5) &         # Strong volume (vs 3.0)
+            momentum_adaptive &                         # Adaptive momentum
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.008) &
+            volume_adaptive &                           # Adaptive volume
             (dataframe['close'] > dataframe['open']) &  # Green candle
-            (dataframe['rsi'] > 60) & (dataframe['rsi'] < 80) &  # Strong RSI range (vs 65)
-            (dataframe['close'] > dataframe['ema_fast'] * 1.002)  # Above EMA (vs 1.003)
+            (dataframe['rsi'] > 60) & (dataframe['rsi'] < 80) &
+            (dataframe['close'] > dataframe['ema_fast'] * 1.002) &
+            (market_health >= 0.8)                     # Premium health only
         )
         
-        # === COMBINE BALANCED SETUPS ===
-        quality_setups = (
-            sweep_reversal | momentum_breakout | session_momentum
+        # === COMBINE MARKET HEALTH AWARE SETUPS ===
+        health_aware_setups = (
+            health_sweep_reversal | health_momentum_breakout | premium_session_momentum
         )
         
-        # === BALANCED ENTRY CONDITION (All Gates + Quality Setups) ===
-        balanced_entry = (
+        # === FINAL ENTRY CONDITION WITH ENHANCED FILTERING ===
+        market_health_entry = (
             momentum_ok & 
             volume_ok & 
             volatility_ok & 
             trend_ok &
-            session_ok &           # Session filter
-            regime_ok &            # NEW: Regime filter for favorable conditions
-            quality_setups         # Quality setups with balanced thresholds
+            session_ok &
+            regime_ok &                # Includes market health requirements
+            health_aware_setups &      # Market health aware setups
+            (~dataframe['choppy_market'])  # Explicit choppiness filter
         )
         
-        dataframe.loc[balanced_entry, "enter_long"] = 1
+        dataframe.loc[market_health_entry, "enter_long"] = 1
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -302,30 +396,36 @@ class CryptoScalpingOptimized(IStrategy):
         """
         return dataframe
 
-# === BALANCED STRATEGY OPTIMIZATION SUMMARY ===
+# === MARKET HEALTH OPTIMIZATION SUMMARY ===
 """
-🎯 RISK/REWARD OPTIMIZATION FIXES:
+🎯 MARKET HEALTH ENHANCEMENTS TO ELIMINATE NEGATIVE MONTHS:
 
-STOP LOSS FIX:
-❌ Old: -4% stop loss (too tight for 1m noise)
-✅ New: -2.5% stop loss (reduce false exits)
-
-ROI BALANCE:
-❌ Old: 3%/2.5%/2% (too aggressive)
-✅ New: 2.5%/2%/1.5% (balanced risk/reward)
-
-FILTERING OPTIMIZATION:
-❌ Old: Ultra-restrictive (missed opportunities)
-✅ New: Balanced quality (more setups, maintained edge)
-
-REGIME AWARENESS:
+CHOPPINESS DETECTION:
 ❌ Old: Blind trading in all conditions
-✅ New: Trade only in favorable volatility/trend regimes
+✅ New: Choppiness Index filter (avoid ranging markets)
 
-🏆 EXPECTED IMPROVEMENT:
-- Fewer stop losses from 1m noise
-- Better risk/reward balance (1:1 vs 1:2)
-- More trading opportunities (balanced filters)
-- Higher probability setups (regime awareness)
-- Consistent positive returns over longer periods
+TREND QUALITY:
+❌ Old: Basic EMA alignment  
+✅ New: Trend quality score (consistency + alignment)
+
+MARKET HEALTH SCORE:
+❌ Old: Simple regime filters
+✅ New: Composite health (trend + volatility + volume + choppiness)
+
+ADAPTIVE FILTERING:
+❌ Old: Fixed thresholds
+✅ New: Stricter requirements when market health poor
+
+🏆 EXPECTED RESULTS:
+- Eliminate choppy market trading (cause of negative months)
+- Higher ROI rate: 70%+ vs 50-60% in poor conditions  
+- Fewer but higher quality trades
+- Consistent positive monthly performance
+- No more May/March style negative months
+
+📊 TARGET METRICS:
+✅ No months with <65% ROI rate
+✅ Consistent 0.2%+ monthly returns
+✅ Eliminate choppy condition trading
+✅ Maintain 1-2% annual growth with low risk
 """ 

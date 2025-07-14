@@ -1,0 +1,57 @@
+🎯 OPTIMIZED STRATEGY - MONTHLY BACKTEST RESULTS
+=================================================================================
+Strategy: CryptoScalpingOptimized v10 (Balanced Risk/Reward)
+Pairs: BTC/USDT, ETH/USDT, SOL/USDT
+Timeframe: 1m
+Optimization: -2.5% stop loss, 2.5%/2%/1.5% ROI, regime filtering
+Generated: Mon Jul 14 12:16:04 -05 2025
+
+📅 January_2025 (20250101-20250201)
+   Total Profit: 0.19% (1.887 USDT)
+   Trades: 18
+   Win Rate: 66.7%
+   📊 ROI exits: 12, Stop losses: 6, Drawdown: 0.31%
+
+📅 February_2025 (20250201-20250301)
+   Total Profit: 0.06% (0.572 USDT)
+   Trades: 6
+   Win Rate: 66.7%
+   📊 ROI exits: 4, Stop losses: 2, Drawdown: 0.25%
+
+📅 March_2025 (20250301-20250401)
+   Total Profit: -0.14% (-1.368 USDT)
+   Trades: 16
+   Win Rate: 56.2%
+   📊 ROI exits: 9, Stop losses: 7, Drawdown: 0.54%
+
+📅 April_2025 (20250401-20250501)
+   Total Profit: 0.73% (7.323 USDT)
+   Trades: 33
+   Win Rate: 72.7%
+   📊 ROI exits: 24, Stop losses: 9, Drawdown: 0.30%
+
+📅 May_2025 (20250501-20250601)
+   Total Profit: -0.09% (-0.868 USDT)
+   Trades: 15
+   Win Rate: 60.0%
+   📊 ROI exits: 9, Stop losses: 6, Drawdown: 0.56%
+
+📅 June_2025 (20250601-20250701)
+   Total Profit: 0.32% (3.224 USDT)
+   Trades: 7
+   Win Rate: 85.7%
+   📊 ROI exits: 6, Stop losses: 1, Drawdown: 0.13%
+
+📅 July_2025_partial (20250701-20250710)
+   Total Profit: 0.00% (0.000 USDT)
+   Trades: 0
+   Win Rate: 0%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.00%
+
+=================================================================================
+📊 SUMMARY STATISTICS
+=================================================================================
+Total Period Profit: 10.770 USDT
+Total Trades: 95
+Average Monthly Profit: 1.795 USDT
+
