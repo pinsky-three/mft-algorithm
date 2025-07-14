@@ -3,27 +3,27 @@
 # isort: skip_file
 
 """
-Crypto Scalping Optimized v6 - ROI-ONLY SIMPLIFICATION 🎯
-========================================================
+Crypto Scalping Optimized v8 - ULTRA-AGGRESSIVE FOR 3% MONTHLY 🎯
+================================================================
 
-BACK TO BASICS: ROI exits work perfectly, custom exits destroy profitability!
+PERFORMANCE ANALYSIS:
+- Enhanced v7: +0.50% over 6 months (+0.27% in best month)
+- Target: 3% monthly (need 11x improvement even in best month!)
+- Current: 0.08% monthly average → Need 3% monthly
 
-📊 ANALYSIS OF COMPLEX v5:
-- ROI exits: 14 trades, 100% win rate, +1.67% profit ✅
-- Custom exits: 656 trades, 40.7% win rate, -5.13% loss ❌
-- Total result: -3.47% return ❌
+🎯 ULTRA-AGGRESSIVE STRATEGY FOR 3% MONTHLY:
+- MAXIMUM ROI targets: 3.0%/2.5%/2.0% (vs 2.0%/1.5%/1.0%)
+- ULTRA-PREMIUM filters: Only absolute best setups
+- MAXIMUM momentum/volume requirements
+- AGGRESSIVE but controlled risk management
 
-🎯 SIMPLIFICATION STRATEGY:
-- Remove ALL custom exit logic
-- Keep only ROI ladder + stoploss
-- Let profitable ROI exits do their job
-- Stop over-engineering exits
+💡 ULTRA-OPTIMIZATION APPROACH:
+- ROI ladder: 3.0%/2.5%/2.0% (3x higher than v7)
+- Ultra-tight entry filters (top 1% setups only)  
+- Maximum momentum (85%+) and volume (2.5x+)
+- Shortest time to profit (10min/30min targets)
 
-💡 HYPOTHESIS: Sometimes simpler is better!
-100% win rate ROI exits suggest the entry logic + ROI ladder is solid.
-Custom exits are the problem, not the solution.
-
-🏆 MISSION: ACHIEVE PROFITABILITY THROUGH SIMPLIFICATION!
+🏆 MISSION: ACHIEVE 3% MONTHLY OR BUST!
 """
 
 from datetime import datetime, timedelta
@@ -40,9 +40,9 @@ from freqtrade.strategy import IStrategy, merge_informative_pair
 
 class CryptoScalpingOptimized(IStrategy):
     """
-    ROI-ONLY SIMPLIFICATION: Let profitable ROI exits do their job!
-    Entry logic + ROI ladder = 100% win rate on ROI exits
-    Remove all custom exit complexity that destroys profitability
+    ULTRA-AGGRESSIVE FOR 3% MONTHLY: Maximum ROI + Ultra-Premium Setups
+    Monthly target: +3% = 36% annual compound growth
+    Ultra-aggressive ROI targets with ultra-premium quality filters
     """
 
     INTERFACE_VERSION = 3
@@ -50,23 +50,23 @@ class CryptoScalpingOptimized(IStrategy):
     can_short: bool = False
     startup_candle_count: int = 300
 
-    # === PROFITABLE ROI LADDER (Only Exit Logic) ===
+    # === ULTRA-AGGRESSIVE ROI LADDER FOR 3% MONTHLY ===
     minimal_roi: Dict[str, float] = {
-        "0": 0.012,     # 1.2% immediate
-        "30": 0.008,    # 0.8% after 30 min
-        "120": 0.004    # 0.4% after 2h
+        "0": 0.030,     # 3.0% immediate (vs 2.0%)
+        "10": 0.025,    # 2.5% after 10 min (vs 1.5% at 20min)
+        "30": 0.020     # 2.0% after 30 min (vs 1.0% at 1h)
     }
     
-    # === SIMPLE STOPLOSS (Risk Management Only) ===
-    stoploss: float = -0.08  # 8% maximum loss
+    # === ULTRA-TIGHT STOPLOSS (Maximum Risk Control) ===
+    stoploss: float = -0.04  # 4% vs 6% (ultra-tight)
     trailing_stop = False
     
-    # === ENTRY PARAMETERS (Keep Working Logic) ===
-    MIN_VOLUME_RATIO = 1.5
-    RSI_THRESHOLD = 48
-    LEVEL_PROXIMITY = 0.012
-    MOMENTUM_STRENGTH = 0.65
-    MIN_ATR_RATIO = 0.0015
+    # === ULTRA-PREMIUM ENTRY PARAMETERS (Top 1% Setups Only) ===
+    MIN_VOLUME_RATIO = 2.5       # 1.8 → 2.5 (massive volume confirmation)
+    RSI_THRESHOLD = 65           # 55 → 65 (very strong momentum)
+    LEVEL_PROXIMITY = 0.005      # 0.8% → 0.5% (ultra-tight levels)
+    MOMENTUM_STRENGTH = 0.85     # 0.75 → 0.85 (ultra-strong momentum)
+    MIN_ATR_RATIO = 0.0025       # 0.2% → 0.25% (ultra-volatile moves)
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []
@@ -224,110 +224,106 @@ class CryptoScalpingOptimized(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        GOLDILOCKS ENTRY LOGIC - Perfectly Balanced
-        Multiple high-probability paths to profitability
+        ULTRA-PREMIUM ENTRY LOGIC - Top 1% Setups Only for 3% Monthly
+        Only absolute highest quality setups with maximum confirmation
         """
         
-        # === CORE QUALITY GATES ===
+        # === ULTRA-PREMIUM QUALITY GATES ===
         momentum_ok = dataframe['momentum_aligned']
         volume_ok = dataframe['volume_confirmed'] 
         volatility_ok = dataframe['volatile_enough']
         trend_ok = dataframe['trend_confirmed']
         session_ok = dataframe['session_ok']
         
-        # === PREMIUM SETUPS (A+ Quality) ===
+        # === ULTRA-PREMIUM SETUPS (Top 1% Quality Only) ===
         
-        # 1. Liquidity sweep reversal (highest probability)
-        sweep_reversal = (
+        # 1. Ultra liquidity sweep reversal (maximum probability)
+        ultra_sweep_reversal = (
             (dataframe['sweep_high'] | dataframe['sweep_low']) &
             (dataframe['close'] > dataframe['open']) &  # Green candle after sweep
-            (dataframe['volume_ratio'] > 1.8)           # Strong volume
+            (dataframe['volume_ratio'] > 3.0) &         # MASSIVE volume (vs 2.2)
+            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum (vs 0.80)
+            (dataframe['rsi'] > 70) & (dataframe['rsi'] < 85)  # Very strong but not extreme
         )
         
-        # 2. Momentum breakout above key levels
-        momentum_breakout = (
+        # 2. Ultra momentum breakout (premium quality only)
+        ultra_momentum_breakout = (
             (dataframe['close'] > dataframe['prev_session_high']) &
             (dataframe['close'].shift(1) <= dataframe['prev_session_high'].shift(1)) &
-            (dataframe['momentum_strength'] > 0.80) &  # Strong momentum
-            (dataframe['volume_ratio'] > 1.8)
+            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum (vs 0.85)
+            (dataframe['volume_ratio'] > 2.8) &         # Ultra volume (vs 2.0)
+            (dataframe['rsi'] > 70) &                   # Very strong RSI (vs 60)
+            (dataframe['rsi'] < 85) &                   # But not overbought
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.008)  # Strong above session
         )
         
-        # 3. Pullback to key levels (trend continuation)
-        pullback_continuation = (
-            trend_ok &
-            (dataframe['near_session_high'] | dataframe['near_session_low']) &
-            (dataframe['close'] > dataframe['ema_fast']) &
-            (dataframe['rsi'] > 35) & (dataframe['rsi'] < 70)  # Wider RSI range
+        # 3. Ultra session momentum (absolute premium)
+        ultra_session_momentum = (
+            session_ok &
+            (dataframe['momentum_strength'] > 0.90) &   # Ultra momentum
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.01) &  # Well above session
+            (dataframe['volume_ratio'] > 3.0) &         # MASSIVE volume
+            (dataframe['close'] > dataframe['open']) &  # Green candle
+            (dataframe['rsi'] > 65) & (dataframe['rsi'] < 80) &  # Strong RSI range
+            (dataframe['close'] > dataframe['ema_fast'] * 1.003)  # Well above EMA
         )
         
-        # 4. Strong momentum setup (no sweep required)
-        momentum_setup = (
-            (dataframe['momentum_strength'] > 0.75) &  # Lower threshold
-            (dataframe['close'] > dataframe['prev_session_close']) &
-            (dataframe['volume_ratio'] > 1.6) &  # Lower volume requirement
-            (dataframe['close'] > dataframe['open'])
+        # === COMBINE ONLY ULTRA-PREMIUM SETUPS ===
+        ultra_premium_setups = (
+            ultra_sweep_reversal | ultra_momentum_breakout | ultra_session_momentum
         )
         
-        # 5. Bounce from session low
-        bounce_setup = (
-            (dataframe['low'] <= dataframe['prev_session_low'] * 1.008) &
-            (dataframe['close'] > dataframe['prev_session_low'] * 1.012) &
-            (dataframe['close'] > dataframe['open']) &
-            (dataframe['rsi'] < 50)  # Less restrictive oversold
-        )
-        
-        # === COMBINE ALL HIGH-PROBABILITY SETUPS ===
-        setup_signals = (
-            sweep_reversal | momentum_breakout | pullback_continuation | 
-            momentum_setup | bounce_setup
-        )
-        
-        # === FINAL ENTRY CONDITION (Quality Gates + Any Setup) ===
-        entry_condition = (
+        # === ULTRA-PREMIUM ENTRY CONDITION (All Gates + Ultra Setups) ===
+        ultra_premium_entry = (
             momentum_ok & 
             volume_ok & 
             volatility_ok & 
             trend_ok &
-            session_ok &      # Session filter always required
-            setup_signals     # Any high-probability setup
+            session_ok &           # Session filter always required
+            ultra_premium_setups   # Only ultra-premium quality setups
         )
         
-        dataframe.loc[entry_condition, "enter_long"] = 1
+        dataframe.loc[ultra_premium_entry, "enter_long"] = 1
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        ROI-ONLY STRATEGY: No custom exit signals
-        Let ROI ladder handle all exits (100% win rate!)
+        ULTRA-AGGRESSIVE ROI-ONLY STRATEGY: No custom exit signals
+        Let ultra-aggressive ROI ladder handle all exits with 3%+ targets
         """
         return dataframe
 
-# === ROI-ONLY SIMPLIFICATION TARGETS ===
+    # === NO CUSTOM EXIT LOGIC - ULTRA-AGGRESSIVE ROI-ONLY ===
+    # Ultra-aggressive ROI ladder does all the work with maximum profit targets
+
+# === ULTRA-AGGRESSIVE STRATEGY TARGETS FOR 3% MONTHLY ===
 """
-🎯 STRATEGY SIMPLIFICATION FOR PROFITABILITY:
+🎯 ULTRA-AGGRESSIVE STRATEGY FOR 3% MONTHLY RETURNS:
 
-COMPLEX EXIT ANALYSIS:
-- Custom exits: 656 trades, 40.7% win rate, -5.13% loss ❌
-- ROI exits: 14 trades, 100% win rate, +1.67% profit ✅
+CURRENT PERFORMANCE ANALYSIS:
+- Enhanced v7: +0.50% over 6 months (+0.27% in best month)
+- Target: 3% monthly (need 11x improvement!)
+- Ultra-aggressive approach required
 
-ROI-ONLY HYPOTHESIS:
-- Entry logic is solid (generates good setups)
-- ROI ladder works perfectly (100% win rate)
-- Custom exits are over-engineering and harmful
-- Simplification = profitability
+ULTRA-OPTIMIZATION APPROACH:
+1. MAXIMUM ROI targets: 3.0%/2.5%/2.0% (3x higher than v7)
+2. Ultra-premium quality: Top 1% setups only
+3. MASSIVE volume confirmation: 2.5x-3.0x average
+4. Ultra-fast profit taking: 10min/30min vs 20min/60min
 
 🏆 EXPECTED RESULTS:
-- Higher % of ROI exits (currently only 14/671 = 2.1%)
-- 100% win rate maintained on ROI exits
-- Elimination of losing custom exits
-- Net positive returns from simplified approach
+- Very few but ultra-high quality trades
+- MAXIMUM profit per trade (target 2-3% avg)
+- Ultra-fast profit realization (10-30 min)
+- Target: 3% monthly = 36% annual compound
 
-📊 SUCCESS METRICS:
-✅ Positive total return (target +1-3%)
-✅ Higher % of profitable ROI exits
-✅ Elimination of -5.13% custom exit losses
-✅ Clean, simple, profitable strategy
-✅ Proof that simpler approach works better
+📊 ULTRA-SUCCESS METRICS:
+✅ 3% monthly return target (minimum requirement)
+✅ Ultra-high profit per trade (target 2-3% avg)
+✅ Ultra-fast execution (10-30 min trades)
+✅ Maximum quality filtering (top 1% setups)
+✅ Ultra-controlled risk (4% stoploss)
 
-🏆 MISSION: PROFITABILITY THROUGH SIMPLIFICATION!
+🏆 MISSION: 3% MONTHLY OR BUST!
+Ultra-aggressive approach for maximum monthly returns!
 """ 
