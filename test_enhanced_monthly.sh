@@ -25,12 +25,12 @@ month_names=(
 results_file="monthly_results_optimized.txt"
 
 # Initialize results file
-echo "🎯 OPTIMIZED STRATEGY - MONTHLY BACKTEST RESULTS" > "$results_file"
+echo "🎯 PHASE 3 FINAL - MONTHLY BACKTEST RESULTS" > "$results_file"
 echo "=================================================================================" >> "$results_file"
-echo "Strategy: CryptoScalpingOptimized v10 (Balanced Risk/Reward)" >> "$results_file"
+echo "Strategy: CryptoScalpingPhase3Final (Market Regime Mastery)" >> "$results_file"
 echo "Pairs: BTC/USDT, ETH/USDT, SOL/USDT" >> "$results_file"
 echo "Timeframe: 1m" >> "$results_file"
-echo "Optimization: -2.5% stop loss, 2.5%/2%/1.5% ROI, regime filtering" >> "$results_file"
+echo "Optimization: Smart regime detection, adaptive targets, performance gating" >> "$results_file"
 echo "Generated: $(date)" >> "$results_file"
 echo "" >> "$results_file"
 
@@ -46,7 +46,7 @@ for i in "${!months[@]}"; do
     echo "🔄 Testing ${month_name} (${timerange})..."
     
     # Run backtest and capture output
-    output=$(docker compose run --rm freqtrade backtesting -s CryptoScalpingOptimized -p BTC/USDT ETH/USDT SOL/USDT --timerange "$timerange" --fee 0.0002 --timeframe 1m 2>/dev/null | tr -d '\r')
+    output=$(docker compose run --rm freqtrade backtesting -s CryptoScalpingPhase3Final -p BTC/USDT ETH/USDT SOL/USDT --timerange "$timerange" --fee 0.0002 --timeframe 1m 2>/dev/null | tr -d '\r')
     
     # Extract data with FIXED patterns matching exact freqtrade output
     profit_percent=$(echo "$output" | grep "│ Total profit %" | head -1 | sed 's/.*│[[:space:]]*\([0-9.-]*\)%[[:space:]]*│.*/\1/')

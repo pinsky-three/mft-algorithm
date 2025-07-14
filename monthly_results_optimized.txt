@@ -1,57 +1,57 @@
-🎯 OPTIMIZED STRATEGY - MONTHLY BACKTEST RESULTS
+🎯 PHASE 3 FINAL - MONTHLY BACKTEST RESULTS
 =================================================================================
-Strategy: CryptoScalpingOptimized v10 (Balanced Risk/Reward)
+Strategy: CryptoScalpingPhase3Final (Market Regime Mastery)
 Pairs: BTC/USDT, ETH/USDT, SOL/USDT
 Timeframe: 1m
-Optimization: -2.5% stop loss, 2.5%/2%/1.5% ROI, regime filtering
-Generated: Mon Jul 14 12:45:46 -05 2025
+Optimization: Smart regime detection, adaptive targets, performance gating
+Generated: Mon Jul 14 15:20:12 -05 2025
 
 📅 January_2025 (20250101-20250201)
-   Total Profit: 0.53% (5.262 USDT)
-   Trades: 41
-   Win Rate: 68.3%
-   📊 ROI exits: 28, Stop losses: 13, Drawdown: 0.28%
+   Total Profit: 0.28% (2.845 USDT)
+   Trades: 23
+   Win Rate: 78.3%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.15%
 
 📅 February_2025 (20250201-20250301)
-   Total Profit: 0.42% (4.247 USDT)
-   Trades: 40
-   Win Rate: 65.0%
-   📊 ROI exits: 26, Stop losses: 12, Drawdown: 0.58%
-
-📅 March_2025 (20250301-20250401)
-   Total Profit: -0.47% (-4.668 USDT)
-   Trades: 54
-   Win Rate: 57.4%
-   📊 ROI exits: 31, Stop losses: 23, Drawdown: 0.77%
-
-📅 April_2025 (20250401-20250501)
-   Total Profit: 0.18% (1.795 USDT)
-   Trades: 65
-   Win Rate: 63.1%
-   📊 ROI exits: 41, Stop losses: 24, Drawdown: 0.91%
-
-📅 May_2025 (20250501-20250601)
-   Total Profit: 0.30% (2.975 USDT)
-   Trades: 39
-   Win Rate: 66.7%
-   📊 ROI exits: 26, Stop losses: 13, Drawdown: 0.51%
-
-📅 June_2025 (20250601-20250701)
-   Total Profit: 0.04% (0.402 USDT)
+   Total Profit: -0.19% (-1.912 USDT)
    Trades: 14
    Win Rate: 64.3%
-   📊 ROI exits: 9, Stop losses: 5, Drawdown: 0.38%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.26%
+
+📅 March_2025 (20250301-20250401)
+   Total Profit: -0.06% (-0.566 USDT)
+   Trades: 20
+   Win Rate: 70.0%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.21%
+
+📅 April_2025 (20250401-20250501)
+   Total Profit: -0.30% (-3.025 USDT)
+   Trades: 32
+   Win Rate: 65.6%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.58%
+
+📅 May_2025 (20250501-20250601)
+   Total Profit: -0.16% (-1.602 USDT)
+   Trades: 12
+   Win Rate: 66.7%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.37%
+
+📅 June_2025 (20250601-20250701)
+   Total Profit: -0.18% (-1.793 USDT)
+   Trades: 7
+   Win Rate: 42.9%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.20%
 
 📅 July_2025_partial (20250701-20250710)
-   Total Profit: -0.13% (-1.268 USDT)
-   Trades: 1
+   Total Profit: 0.00% (0.000 USDT)
+   Trades: 0
    Win Rate: 0%
-   📊 ROI exits: 0, Stop losses: 1, Drawdown: 0.13%
+   📊 ROI exits: 0, Stop losses: 0, Drawdown: 0.00%
 
 =================================================================================
 📊 SUMMARY STATISTICS
 =================================================================================
-Total Period Profit: 8.745 USDT
-Total Trades: 254
-Average Monthly Profit: 1.457 USDT
+Total Period Profit: -6.053 USDT
+Total Trades: 108
+Average Monthly Profit: -1.008 USDT
 
