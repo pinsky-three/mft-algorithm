@@ -56,17 +56,17 @@ class CryptoScalpingOptimized(IStrategy):
     stoploss: float = -0.025  # 2.5% (vs 4% - reduce false exits)
     trailing_stop = False
     
-    # === JULY-ADAPTED MARKET HEALTH THRESHOLDS FOR 1M ===
-    MIN_MARKET_HEALTH = 0.4      # JULY: Relaxed from 0.5 (better current conditions)
-    MIN_TREND_QUALITY = 0.18     # JULY: Relaxed from 0.2 (micro-trend acceptance)  
-    MAX_CHOPPINESS = 0.75        # JULY: Relaxed from 0.7 (noise tolerance)
+    # === BALANCED MARKET HEALTH THRESHOLDS FOR 1M ===
+    MIN_MARKET_HEALTH = 0.5      # Balanced: 0.4 too low, 0.6 too high
+    MIN_TREND_QUALITY = 0.2      # Balanced: 0.15 too low, 0.3 too high  
+    MAX_CHOPPINESS = 0.7         # Balanced: 0.8 too high, 0.6 too low
     
-    # === JULY-ADAPTED ENTRY PARAMETERS ===
-    MIN_VOLUME_RATIO = 1.7       # JULY: Relaxed from 1.9 (more opportunities)
-    RSI_THRESHOLD = 55           # JULY: Relaxed from 57 (earlier entries)
-    LEVEL_PROXIMITY = 0.005      # Keep proven value
-    MOMENTUM_STRENGTH = 0.75     # JULY: Relaxed from 0.78 (moderate momentum)
-    MIN_ATR_RATIO = 0.002        # JULY: Relaxed from 0.0022 (volatility tolerance)
+    # === BALANCED ENTRY PARAMETERS ===
+    MIN_VOLUME_RATIO = 1.9       # Balanced: 1.8 too low, 2.0 too high
+    RSI_THRESHOLD = 57           # Balanced: 55 too low, 60 too high
+    LEVEL_PROXIMITY = 0.005      # Keep same
+    MOMENTUM_STRENGTH = 0.78     # Balanced: 0.75 too low, 0.80 too high
+    MIN_ATR_RATIO = 0.0022       # Balanced: 0.002 too low, 0.0025 too high
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []

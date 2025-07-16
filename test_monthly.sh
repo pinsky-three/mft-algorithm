@@ -7,7 +7,7 @@ months=(
     "20250401-20250501"  # April 2025
     "20250501-20250601"  # May 2025
     "20250601-20250701"  # June 2025
-    "20250701-20250710"  # July 2025 (partial)
+    "20250701-20250715"  # July 2025 (partial)
 )
 
 # Test each month individually with optimized strategy and save results
@@ -47,7 +47,7 @@ for i in "${!months[@]}"; do
     echo "🔄 Testing ${month_name} (${timerange})..."
     
     # Run backtest and capture output
-    output=$(docker compose run --rm freqtrade backtesting -s CryptoScalpingOptimized -p BTC/USDT ETH/USDT SOL/USDT --timerange "$timerange" --fee 0.0002 --timeframe 1m 2>/dev/null | tr -d '\r')
+    output=$(docker compose run --rm freqtrade backtesting -s CryptoScalpingOptimizedJuly -p BTC/USDT ETH/USDT SOL/USDT --timerange "$timerange" --fee 0.0002 --timeframe 1m 2>/dev/null | tr -d '\r')
     
     # Extract data with FIXED patterns matching exact freqtrade output
     profit_percent=$(echo "$output" | grep "│ Total profit %" | head -1 | sed 's/.*│[[:space:]]*\([0-9.-]*\)%[[:space:]]*│.*/\1/')

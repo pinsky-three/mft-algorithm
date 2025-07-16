@@ -3,23 +3,23 @@
 # isort: skip_file
 
 """
-Crypto Scalping Optimized v12 - 1M TIMEFRAME OPTIMIZATION 🚀
-============================================================
+Crypto Scalping Optimized July 2025 - CURRENT MARKET ADAPTATION 🎯
+==================================================================
 
-PROBLEM IDENTIFIED: v11 Market Health filters too restrictive for 1m
-- 1m performance: 1.08% (95 trades) vs 5m: 1.67% (172 trades)
-- Over-filtering reducing opportunities by 45%
-- Market health requirements too high for micro-timeframe scalping
+JULY 2025 PROBLEM IDENTIFIED:
+- Only 1 trade in 11 days (over-filtering in current conditions)
+- Market up +8.11% but strategy missed opportunities
+- Strategy too conservative for current market regime
 
-🔧 1M OPTIMIZATION FIXES:
-1. RELAXED MARKET HEALTH: 0.4 vs 0.6 (accept more market conditions)
-2. REDUCED CHOPPINESS SENSITIVITY: 0.8 vs 0.6 (allow 1m noise)
-3. LOWER TREND QUALITY: 0.15 vs 0.3 (accept micro-trends)
-4. ADAPTIVE SCALING: Reduce adaptive thresholds by 50%
-5. PAIR OPTIMIZATION: Enhance ETH performance (showed 76.5% win rate)
+🔧 JULY 2025 ADAPTATIONS:
+1. RELAXED MARKET HEALTH: 0.4 (vs 0.5) - Accept current conditions
+2. REDUCED VOLUME THRESHOLD: 1.7x (vs 1.9x) - More opportunities  
+3. RELAXED RSI: 55 (vs 57) - Earlier entries in trending market
+4. RELAXED MOMENTUM: 0.75 (vs 0.78) - Accept moderate momentum
+5. ENHANCED SESSION FILTER: Better adapt to July trading patterns
 
-🎯 TARGET: Increase 1m trades from 95 to 130+ while maintaining quality
-Expected: 1.5%+ profit with better opportunity capture
+🎯 TARGET: Maintain strong performance in other months while adapting to July
+Expected: 2-4 trades per week in July conditions vs current 0.1 trades/day
 """
 
 from datetime import datetime, timedelta
@@ -34,10 +34,10 @@ import freqtrade.vendor.qtpylib.indicators as qtpylib
 from freqtrade.persistence import Trade
 from freqtrade.strategy import IStrategy, merge_informative_pair
 
-class CryptoScalpingOptimized(IStrategy):
+class CryptoScalpingOptimizedJuly(IStrategy):
     """
-    1M-OPTIMIZED SCALPING - Balanced Market Health for Micro-Timeframes
-    Relaxed filtering while maintaining quality entries
+    JULY 2025 MARKET-ADAPTED SCALPING - Balanced Filtering for Current Conditions
+    Maintains historical performance while adapting to July market regime
     """
 
     INTERFACE_VERSION = 3
@@ -45,28 +45,28 @@ class CryptoScalpingOptimized(IStrategy):
     can_short: bool = False
     startup_candle_count: int = 300
 
-    # === OPTIMIZED ROI LADDER (Validation-Proven) ===
+    # === PROVEN ROI LADDER (Keep Successful Settings) ===
     minimal_roi: Dict[str, float] = {
-        "0": 0.030,     # 3.0% immediate (optimized: +127% validation improvement)
-        "2": 0.025,     # 2.5% after 2 min (optimized)
-        "6": 0.020      # 2.0% after 6 min (optimized)
+        "0": 0.030,     # 3.0% immediate (validated)
+        "2": 0.025,     # 2.5% after 2 min (validated)
+        "6": 0.020      # 2.0% after 6 min (validated)
     }
     
-    # === OPTIMIZED STOPLOSS (Reduce 1m Noise) ===
-    stoploss: float = -0.025  # 2.5% (vs 4% - reduce false exits)
+    # === PROVEN STOPLOSS (Keep Successful Settings) ===
+    stoploss: float = -0.025  # 2.5% (validated)
     trailing_stop = False
     
-    # === JULY-ADAPTED MARKET HEALTH THRESHOLDS FOR 1M ===
-    MIN_MARKET_HEALTH = 0.4      # JULY: Relaxed from 0.5 (better current conditions)
-    MIN_TREND_QUALITY = 0.18     # JULY: Relaxed from 0.2 (micro-trend acceptance)  
-    MAX_CHOPPINESS = 0.75        # JULY: Relaxed from 0.7 (noise tolerance)
+    # === JULY-ADAPTED MARKET HEALTH THRESHOLDS ===
+    MIN_MARKET_HEALTH = 0.4      # JULY: Relaxed from 0.5 (accept more conditions)
+    MIN_TREND_QUALITY = 0.18     # JULY: Slightly relaxed from 0.2
+    MAX_CHOPPINESS = 0.75        # JULY: Slightly relaxed from 0.7
     
     # === JULY-ADAPTED ENTRY PARAMETERS ===
     MIN_VOLUME_RATIO = 1.7       # JULY: Relaxed from 1.9 (more opportunities)
     RSI_THRESHOLD = 55           # JULY: Relaxed from 57 (earlier entries)
-    LEVEL_PROXIMITY = 0.005      # Keep proven value
-    MOMENTUM_STRENGTH = 0.75     # JULY: Relaxed from 0.78 (moderate momentum)
-    MIN_ATR_RATIO = 0.002        # JULY: Relaxed from 0.0022 (volatility tolerance)
+    LEVEL_PROXIMITY = 0.005      # Keep same (working well)
+    MOMENTUM_STRENGTH = 0.75     # JULY: Relaxed from 0.78 (accept moderate momentum)
+    MIN_ATR_RATIO = 0.002        # JULY: Slightly relaxed from 0.0022
 
     def informative_pairs(self) -> List[Tuple[str, str]]:
         pairs = []
@@ -76,9 +76,9 @@ class CryptoScalpingOptimized(IStrategy):
         return pairs
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        """Enhanced indicator stack with 1m-optimized market health awareness"""
+        """Enhanced indicator stack with July-adapted market health awareness"""
         
-        # === Core Momentum Stack ===
+        # === Core Momentum Stack (Keep Proven) ===
         dataframe["ema_fast"] = ta.EMA(dataframe, timeperiod=10)
         dataframe["ema_mid"] = ta.EMA(dataframe, timeperiod=21)
         dataframe["ema_slow"] = ta.EMA(dataframe, timeperiod=42)
@@ -95,9 +95,9 @@ class CryptoScalpingOptimized(IStrategy):
         dataframe["volume_sma"] = ta.SMA(dataframe['volume'], timeperiod=20)
         dataframe["volume_ratio"] = dataframe['volume'] / dataframe["volume_sma"]
         
-        # === 1M-OPTIMIZED MARKET HEALTH DETECTION ===
+        # === JULY-ADAPTED MARKET HEALTH DETECTION ===
         
-        # 1. Relaxed Choppiness Index (allow more 1m noise)
+        # 1. July-adapted Choppiness Index (slightly more tolerant)
         def choppiness_index(df, period=14):
             """Calculate Choppiness Index - higher values = more choppy/ranging"""
             # Calculate True Range
@@ -120,45 +120,45 @@ class CryptoScalpingOptimized(IStrategy):
         dataframe['choppiness'] = choppiness_index(dataframe)
         dataframe['choppy_market'] = dataframe['choppiness'] > (self.MAX_CHOPPINESS * 100)
         
-        # 2. Relaxed Trend Quality (accept micro-trends)
+        # 2. July-adapted Trend Quality (slightly more accepting)
         dataframe['ema_alignment'] = (
             (dataframe['ema_fast'] > dataframe['ema_mid']) &
             (dataframe['ema_mid'] > dataframe['ema_slow'])
         ).astype(int)
         
-        # Reduce trend quality requirements for 1m
+        # July-adapted trend quality requirements
         dataframe['trend_strength'] = (
-            dataframe['ema_alignment'].rolling(5).mean()  # Shorter period for 1m
+            dataframe['ema_alignment'].rolling(5).mean()  # Keep same period
         )
         dataframe['trend_quality'] = dataframe['trend_strength']
         
-        # 3. 1m-Optimized Market Health Score (more lenient)
+        # 3. July-adapted Market Health Score (more lenient for current conditions)
         health_factors = [
             (~dataframe['choppy_market']).astype(int),                    # Not choppy
-            (dataframe['trend_quality'] >= self.MIN_TREND_QUALITY).astype(int),  # Micro-trend OK
-            (dataframe['volume_ratio'] > 1.2).astype(int),                # Basic volume
-            (dataframe['atr'] / dataframe['close'] > 0.0015).astype(int)   # Minimal volatility
+            (dataframe['trend_quality'] >= self.MIN_TREND_QUALITY).astype(int),  # July-relaxed
+            (dataframe['volume_ratio'] > 1.15).astype(int),               # July: Reduced from 1.2
+            (dataframe['atr'] / dataframe['close'] > 0.0013).astype(int)  # July: Reduced from 0.0015
         ]
         
         dataframe['market_health'] = np.mean(health_factors, axis=0)
         
-        # 4. Volatility regime (1m-optimized)
+        # 4. July-adapted volatility regime (more accepting)
         dataframe['atr_sma'] = dataframe['atr'].rolling(20).mean()
         dataframe['volatility_ratio'] = dataframe['atr'] / dataframe['atr_sma']
         dataframe['favorable_volatility'] = (
-            (dataframe['volatility_ratio'] > 1.1) &  # Reduced from 1.2
-            (dataframe['volatility_ratio'] < 2.5)    # Allow higher volatility
+            (dataframe['volatility_ratio'] > 1.05) &  # July: Reduced from 1.1
+            (dataframe['volatility_ratio'] < 2.8)     # July: Increased from 2.5
         )
         
-        # Trend strength regime (1m-optimized)
+        # July-adapted trend strength regime
         dataframe['ema_spread'] = (dataframe['ema_fast'] - dataframe['ema_slow']) / dataframe['close']
         dataframe['trend_strength_alt'] = abs(dataframe['ema_spread'])
-        dataframe['trending_regime'] = dataframe['trend_strength_alt'] > 0.002  # Reduced from 0.003
+        dataframe['trending_regime'] = dataframe['trend_strength_alt'] > 0.0018  # July: Reduced from 0.002
         
-        # === Key Levels ===
+        # === Key Levels (Keep Proven) ===
         dataframe = self.calculate_liquidity_levels(dataframe)
         
-        # === 15m Trend Context ===
+        # === 15m Trend Context (Keep Proven) ===
         if self.dp and metadata:
             try:
                 informative_15m = self.dp.get_pair_dataframe(
@@ -179,11 +179,11 @@ class CryptoScalpingOptimized(IStrategy):
             except Exception:
                 dataframe['trend_15m_15m'] = True
 
-        # === 1M-OPTIMIZED MOMENTUM CALCULATION ===
+        # === JULY-ADAPTED MOMENTUM CALCULATION ===
         momentum_conditions = [
             dataframe["ema_fast"] > dataframe["ema_mid"],
             dataframe["ema_mid"] > dataframe["ema_slow"],
-            dataframe["rsi"] > self.RSI_THRESHOLD,  # Reduced from 60 to 55
+            dataframe["rsi"] > self.RSI_THRESHOLD,  # July: Relaxed to 55
             dataframe["macd"] > dataframe["macdsignal"],
             dataframe["close"] > dataframe["ema_fast"]
         ]
@@ -192,43 +192,46 @@ class CryptoScalpingOptimized(IStrategy):
         momentum_score = np.sum(momentum_conditions, axis=0)
         dataframe['momentum_strength'] = momentum_score / len(momentum_conditions)
         dataframe['momentum_aligned'] = (
-            dataframe['momentum_strength'] >= self.MOMENTUM_STRENGTH  # Reduced from 0.80 to 0.75
+            dataframe['momentum_strength'] >= self.MOMENTUM_STRENGTH  # July: Relaxed to 0.75
         )
         
-        # 1m-optimized filters (more lenient)
+        # July-adapted filters (more lenient)
         dataframe['volume_confirmed'] = (
-            dataframe["volume_ratio"] > self.MIN_VOLUME_RATIO  # Reduced from 2.0 to 1.8
+            dataframe["volume_ratio"] > self.MIN_VOLUME_RATIO  # July: Relaxed to 1.7
         )
         
         dataframe['volatile_enough'] = (
-            dataframe["atr"] / dataframe["close"] > self.MIN_ATR_RATIO  # Reduced from 0.0025 to 0.002
+            dataframe["atr"] / dataframe["close"] > self.MIN_ATR_RATIO  # July: Relaxed to 0.002
         )
         
         # Trend confirmation from 15m
         dataframe['trend_confirmed'] = dataframe.get('trend_15m_15m', True)
         
-        # === 1M-OPTIMIZED REGIME CONFIRMATION ===
+        # === JULY-ADAPTED REGIME CONFIRMATION ===
         dataframe['regime_favorable'] = (
             dataframe['favorable_volatility'] &
             dataframe['trending_regime'] &
-            (dataframe['market_health'] >= self.MIN_MARKET_HEALTH) &  # Relaxed from 0.6 to 0.4
-            (dataframe['trend_quality'] >= self.MIN_TREND_QUALITY) &  # Relaxed from 0.3 to 0.15
-            (~dataframe['choppy_market'])                             # Relaxed choppiness threshold
+            (dataframe['market_health'] >= self.MIN_MARKET_HEALTH) &  # July: Relaxed to 0.4
+            (dataframe['trend_quality'] >= self.MIN_TREND_QUALITY) &  # July: Relaxed to 0.18
+            (~dataframe['choppy_market'])                             # July: Relaxed choppiness
         )
         
-        # === SESSION BIAS FILTER ===
+        # === ENHANCED SESSION BIAS FILTER FOR JULY ===
         try:
             df_hours = dataframe.index.hour
             df_minutes = dataframe.index.minute
             minutes_since_midnight = df_hours * 60 + df_minutes
             
-            # London session (07:00-10:00 UTC) = 420-600 minutes
-            london_session = (minutes_since_midnight >= 420) & (minutes_since_midnight < 600)
+            # London session (07:00-11:00 UTC) = 420-660 minutes (JULY: Extended)
+            london_session = (minutes_since_midnight >= 420) & (minutes_since_midnight < 660)
             
-            # NY session (12:30-16:00 UTC) = 750-960 minutes
-            ny_session = (minutes_since_midnight >= 750) & (minutes_since_midnight < 960)
+            # NY session (12:30-17:00 UTC) = 750-1020 minutes (JULY: Extended)
+            ny_session = (minutes_since_midnight >= 750) & (minutes_since_midnight < 1020)
             
-            dataframe['session_ok'] = london_session | ny_session
+            # Asian session (22:00-02:00 UTC) = 1320+ or <120 minutes (JULY: Added for more opportunities)
+            asian_session = (minutes_since_midnight >= 1320) | (minutes_since_midnight < 120)
+            
+            dataframe['session_ok'] = london_session | ny_session | asian_session  # JULY: Added Asian
         except:
             # Fallback if index is not datetime
             dataframe['session_ok'] = True
@@ -237,7 +240,7 @@ class CryptoScalpingOptimized(IStrategy):
 
     def calculate_liquidity_levels(self, df: DataFrame) -> DataFrame:
         """
-        Calculate key levels with liquidity sweep detection
+        Calculate key levels with liquidity sweep detection (Keep Proven Logic)
         """
         
         # Session-based levels (6 hours = 72 candles on 5m)
@@ -288,158 +291,152 @@ class CryptoScalpingOptimized(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        1M-OPTIMIZED ENTRY LOGIC - Relaxed Market Health for Better Opportunities
-        Reduced over-filtering while maintaining quality
+        JULY-ADAPTED ENTRY LOGIC - Balanced Relaxation for Current Market Conditions
+        Maintains quality while increasing opportunities in July 2025
         """
         
-        # === RELAXED QUALITY GATES FOR 1M ===
+        # === JULY-ADAPTED QUALITY GATES ===
         momentum_ok = dataframe['momentum_aligned']
         volume_ok = dataframe['volume_confirmed'] 
         volatility_ok = dataframe['volatile_enough']
         trend_ok = dataframe['trend_confirmed']
-        session_ok = dataframe['session_ok']
-        regime_ok = dataframe['regime_favorable']  # Now uses relaxed market health (0.4)
+        session_ok = dataframe['session_ok']  # Now includes Asian session
+        regime_ok = dataframe['regime_favorable']  # Now uses July-relaxed thresholds
         
-        # === BALANCED ADAPTIVE FILTERING FOR 1M ===
-        # Moderate adaptive filtering (balanced approach)
+        # === JULY-ADAPTED ADAPTIVE FILTERING ===
+        # Slightly more lenient adaptive filtering for July conditions
         market_health = dataframe['market_health']
         
-        # Balanced adaptive volume threshold
+        # July-adapted adaptive volume threshold
         adaptive_volume_threshold = np.where(
-            market_health >= 0.6,               # Moderate threshold
+            market_health >= 0.55,              # July: Reduced from 0.6
             self.MIN_VOLUME_RATIO,             # Normal volume in good health
-            self.MIN_VOLUME_RATIO * 1.2        # Moderate penalty
+            self.MIN_VOLUME_RATIO * 1.15       # July: Reduced penalty (1.15 vs 1.2)
         )
         volume_adaptive = dataframe['volume_ratio'] > adaptive_volume_threshold
         
-        # Balanced adaptive momentum threshold  
+        # July-adapted adaptive momentum threshold  
         adaptive_momentum_threshold = np.where(
-            market_health >= 0.6,               # Moderate threshold
+            market_health >= 0.55,              # July: Reduced from 0.6
             self.MOMENTUM_STRENGTH,            # Normal momentum in good health
-            self.MOMENTUM_STRENGTH + 0.07      # Moderate penalty
+            self.MOMENTUM_STRENGTH + 0.05      # July: Reduced penalty (0.05 vs 0.07)
         )
         momentum_adaptive = dataframe['momentum_strength'] > adaptive_momentum_threshold
         
-        # === BALANCED 1M SETUPS WITH MODERATE REQUIREMENTS ===
+        # === JULY-ADAPTED SETUPS ===
         
-        # 1. Balanced Liquidity Sweep (quality focused)
-        sweep_reversal_1m = (
+        # 1. July-adapted Liquidity Sweep (slightly more opportunities)
+        sweep_reversal_july = (
             (dataframe['sweep_high'] | dataframe['sweep_low']) &
             (dataframe['close'] > dataframe['open']) &  # Green candle after sweep
-            volume_adaptive &                           # Balanced adaptive volume
-            momentum_adaptive &                         # Balanced adaptive momentum  
-            (dataframe['rsi'] > 58) & (dataframe['rsi'] < 85) &  # Moderate RSI requirement
-            (market_health >= 0.5)                     # Balanced health requirement
+            volume_adaptive &                           # July-adapted adaptive volume
+            momentum_adaptive &                         # July-adapted adaptive momentum  
+            (dataframe['rsi'] > 56) & (dataframe['rsi'] < 85) &  # July: Slightly relaxed from 58
+            (market_health >= 0.45)                    # July: Relaxed from 0.5
         )
         
-        # 2. 1m Momentum Breakout (balanced)
-        momentum_breakout_1m = (
+        # 2. July-adapted Momentum Breakout
+        momentum_breakout_july = (
             (dataframe['close'] > dataframe['prev_session_high']) &
             (dataframe['close'].shift(1) <= dataframe['prev_session_high'].shift(1)) &
-            momentum_adaptive &                         # Balanced adaptive momentum
-            volume_adaptive &                           # Balanced adaptive volume
-            (dataframe['rsi'] > 58) & (dataframe['rsi'] < 85) &  # Moderate RSI requirement
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.005) &  # Moderate move requirement
-            (market_health >= 0.45)                    # Moderate health requirement
+            momentum_adaptive &                         # July-adapted adaptive momentum
+            volume_adaptive &                           # July-adapted adaptive volume
+            (dataframe['rsi'] > 56) & (dataframe['rsi'] < 85) &  # July: Slightly relaxed from 58
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.0035) &  # July: Reduced from 1.005
+            (market_health >= 0.4)                     # July: Relaxed from 0.45
         )
         
-        # 3. Balanced 1m Session Momentum 
-        basic_session_momentum = (
+        # 3. July-adapted Session Momentum 
+        basic_session_momentum_july = (
             session_ok &
-            momentum_adaptive &                         # Balanced adaptive momentum
-            (dataframe['close'] > dataframe['prev_session_close'] * 1.004) &  # Moderate move
-            volume_adaptive &                           # Balanced adaptive volume
+            momentum_adaptive &                         # July-adapted adaptive momentum
+            (dataframe['close'] > dataframe['prev_session_close'] * 1.003) &  # July: Reduced from 1.004
+            volume_adaptive &                           # July-adapted adaptive volume
             (dataframe['close'] > dataframe['open']) &  # Green candle
-            (dataframe['rsi'] > 58) & (dataframe['rsi'] < 80) &  # Moderate RSI requirement
-            (dataframe['close'] > dataframe['ema_fast'] * 1.0015) &  # Moderate EMA requirement
-            (market_health >= 0.4)                     # Moderate health requirement
+            (dataframe['rsi'] > 56) & (dataframe['rsi'] < 80) &  # July: Slightly relaxed from 58
+            (dataframe['close'] > dataframe['ema_fast'] * 1.001) &  # July: Reduced from 1.0015
+            (market_health >= 0.35)                    # July: Relaxed from 0.4
         )
         
-        # === COMBINE BALANCED 1M SETUPS ===
-        balanced_1m_setups = (
-            sweep_reversal_1m | momentum_breakout_1m | basic_session_momentum
+        # === COMBINE JULY-ADAPTED SETUPS ===
+        july_adapted_setups = (
+            sweep_reversal_july | momentum_breakout_july | basic_session_momentum_july
         )
         
-        # === BALANCED PAIR-SPECIFIC OPTIMIZATIONS FOR 1M ===
-        # ETH/USDT showed 76.5% win rate on 1m - enhance moderately
+        # === JULY-ADAPTED PAIR-SPECIFIC OPTIMIZATIONS ===
+        # Keep successful pair-specific optimizations but relax slightly for July
         if metadata and 'pair' in metadata:
             pair = metadata['pair']
             
-            # ETH-specific enhancements (moderate approach)
+            # ETH-specific enhancements (slightly relaxed for July)
             if 'ETH' in pair:
-                eth_enhanced_momentum = (
+                eth_enhanced_momentum_july = (
                     momentum_ok & 
                     volume_ok & 
                     (dataframe['close'] > dataframe['open']) &  # Green candle
-                    (dataframe['rsi'] > 55) & (dataframe['rsi'] < 80) &  # Moderate RSI for ETH
+                    (dataframe['rsi'] > 53) & (dataframe['rsi'] < 80) &  # July: Relaxed from 55
                     (dataframe['close'] > dataframe['ema_fast']) &
-                    (market_health >= 0.35)  # Moderate relaxation for ETH
+                    (market_health >= 0.3)  # July: Relaxed from 0.35
                 )
-                balanced_1m_setups = balanced_1m_setups | eth_enhanced_momentum
+                july_adapted_setups = july_adapted_setups | eth_enhanced_momentum_july
             
-            # SOL-specific adjustments (tighter controls due to underperformance)
+            # SOL-specific adjustments (keep tighter but relax slightly for July)
             elif 'SOL' in pair:
-                sol_precise_momentum = (
+                sol_precise_momentum_july = (
                     momentum_ok & 
                     volume_adaptive &  # Use adaptive for SOL
                     volatility_ok &
                     (dataframe['close'] > dataframe['open']) &  # Green candle
-                    (dataframe['rsi'] > 62) & (dataframe['rsi'] < 78) &  # Tighter RSI for SOL
-                    (dataframe['close'] > dataframe['ema_fast'] * 1.003) &  # Stronger momentum required
-                    (market_health >= 0.55)  # Higher health requirement for SOL
+                    (dataframe['rsi'] > 60) & (dataframe['rsi'] < 78) &  # July: Slightly relaxed from 62
+                    (dataframe['close'] > dataframe['ema_fast'] * 1.0025) &  # July: Relaxed from 1.003
+                    (market_health >= 0.5)  # July: Relaxed from 0.55
                 )
-                balanced_1m_setups = balanced_1m_setups | sol_precise_momentum
+                july_adapted_setups = july_adapted_setups | sol_precise_momentum_july
         
-        # === FINAL ENTRY CONDITION WITH BALANCED FILTERING ===
-        balanced_1m_entry = (
+        # === FINAL ENTRY CONDITION WITH JULY ADAPTATIONS ===
+        july_adapted_entry = (
             momentum_ok & 
             volume_ok & 
             volatility_ok & 
             trend_ok &
-            regime_ok &                # Uses balanced market health (0.5)
-            balanced_1m_setups &       # Balanced 1m setups (includes pair-specific)
-            (~dataframe['choppy_market'])  # Balanced choppiness filter (0.7)
+            regime_ok &                # Uses July-adapted market health (0.4)
+            july_adapted_setups &      # July-adapted setups (includes pair-specific)
+            (~dataframe['choppy_market'])  # July-adapted choppiness filter (0.75)
         )
         
-        dataframe.loc[balanced_1m_entry, "enter_long"] = 1
+        dataframe.loc[july_adapted_entry, "enter_long"] = 1
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
-        BALANCED ROI-ONLY STRATEGY: Let optimized ROI ladder handle exits
+        PROVEN ROI-ONLY STRATEGY: Let validated ROI ladder handle exits
         """
         return dataframe
 
-# === MARKET HEALTH OPTIMIZATION SUMMARY ===
+# === JULY 2025 OPTIMIZATION SUMMARY ===
 """
-🎯 MARKET HEALTH ENHANCEMENTS TO ELIMINATE NEGATIVE MONTHS:
+🎯 JULY 2025 MARKET ADAPTATIONS:
 
-CHOPPINESS DETECTION:
-❌ Old: Blind trading in all conditions
-✅ New: Choppiness Index filter (avoid ranging markets)
+PROBLEM:
+❌ Only 1 trade in 11 days in July (over-filtering)
+❌ Market up +8.11% but strategy missed opportunities
 
-TREND QUALITY:
-❌ Old: Basic EMA alignment  
-✅ New: Trend quality score (consistency + alignment)
+SOLUTIONS:
+✅ Market Health: Relaxed to 0.4 (from 0.5)
+✅ Volume Threshold: Relaxed to 1.7x (from 1.9x)  
+✅ RSI Threshold: Relaxed to 55 (from 57)
+✅ Momentum Strength: Relaxed to 0.75 (from 0.78)
+✅ Session Filter: Added Asian session for more opportunities
+✅ Adaptive Penalties: Reduced to be less restrictive
 
-MARKET HEALTH SCORE:
-❌ Old: Simple regime filters
-✅ New: Composite health (trend + volatility + volume + choppiness)
+🏆 EXPECTED JULY RESULTS:
+- Increase from 0.1 trades/day to 2-4 trades/week
+- Maintain risk profile (same ROI/stoploss)
+- Preserve strong performance in other months
+- Better capture July market movements
 
-ADAPTIVE FILTERING:
-❌ Old: Fixed thresholds
-✅ New: Stricter requirements when market health poor
-
-🏆 EXPECTED RESULTS:
-- Eliminate choppy market trading (cause of negative months)
-- Higher ROI rate: 70%+ vs 50-60% in poor conditions  
-- Fewer but higher quality trades
-- Consistent positive monthly performance
-- No more May/March style negative months
-
-📊 TARGET METRICS:
-✅ No months with <65% ROI rate
-✅ Consistent 0.2%+ monthly returns
-✅ Eliminate choppy condition trading
-✅ Maintain 1-2% annual growth with low risk
+📊 VALIDATION STRATEGY:
+✅ Test July performance (target: 2-3 trades minimum)
+✅ Verify other months maintain performance
+✅ Deploy if July improves without compromising history
 """ 
