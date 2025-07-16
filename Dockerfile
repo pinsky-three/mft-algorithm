@@ -31,8 +31,8 @@ USER ftuser
 
 EXPOSE 8080
 
-# Use direct python module execution - most reliable for Railway
-ENTRYPOINT ["python", "-m", "freqtrade"]
+# Use the same approach as the original freqtrade image - don't override ENTRYPOINT
+# The base image already has ENTRYPOINT ["freqtrade"] which works correctly
 
 CMD ["trade", \
      "--logfile", "./user_data/logs/freqtrade.log", \
