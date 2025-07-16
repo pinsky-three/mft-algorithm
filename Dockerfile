@@ -5,7 +5,7 @@ WORKDIR /freqtrade
 # Copy user data
 COPY ./user_data /freqtrade/user_data
 
-# Switch to root to modify permissions and create config
+# Switch to root for setup
 USER root
 
 # Create logs directory, set permissions, and ensure config exists
@@ -13,12 +13,23 @@ RUN mkdir -p ./user_data/logs && \
     chmod -R 777 ./user_data && \
     chown -R ftuser:ftuser ./user_data
 
-# Verify Python and freqtrade installation
+# Verify freqtrade installation and create startup script to handle Railway volume mounts
 RUN echo "Checking Python and freqtrade installation..." && \
-    python -c "import freqtrade; print('freqtrade module found')" && \
+    python -c "import freqtrade; print('freqtrade module found at:', freqtrade.__file__)" && \
     which python && \
     python --version && \
     echo "Python environment verified"
+
+# Create a Railway-compatible startup script that sets the correct Python path
+RUN cat > /usr/local/bin/freqtrade-railway << 'EOF'
+#!/bin/bash
+# Ensure freqtrade source is in Python path for Railway volume mounting
+export PYTHONPATH="/freqtrade:$PYTHONPATH"
+cd /freqtrade
+exec python -m freqtrade "$@"
+EOF
+
+RUN chmod +x /usr/local/bin/freqtrade-railway
 
 # Create default config if it doesn't exist
 RUN if [ ! -f "./user_data/config.json" ]; then \
@@ -31,8 +42,8 @@ USER ftuser
 
 EXPOSE 8080
 
-# Use the same approach as the original freqtrade image - don't override ENTRYPOINT
-# The base image already has ENTRYPOINT ["freqtrade"] which works correctly
+# Use our Railway-compatible script that sets PYTHONPATH correctly
+ENTRYPOINT ["freqtrade-railway"]
 
 CMD ["trade", \
      "--logfile", "./user_data/logs/freqtrade.log", \
