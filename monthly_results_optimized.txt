@@ -42,3 +42,16 @@ Generated: Wed Jul 16 00:09:42 -05 2025
    Win Rate: 59.1%
    📊 ROI exits: 13, Stop losses: 8, Drawdown: 0.42%
 
+📅 July_2025_partial (20250701-20250715)
+   Total Profit: 0.03% (0.313 USDT)
+   Trades: 3
+   Win Rate: 66.7%
+   📊 ROI exits: 1, Stop losses: 1, Drawdown: 0.13%
+
+=================================================================================
+📊 SUMMARY STATISTICS
+=================================================================================
+Total Period Profit: 13.320 USDT
+Total Trades: 337
+Average Monthly Profit: 2.220 USDT
+

@@ -10,7 +10,7 @@ echo ""
 
 # Date range for comprehensive data
 START_DATE="20240101"
-END_DATE="20250712"
+END_DATE="20250715"
 
 echo "📅 Date Range: ${START_DATE} to ${END_DATE}"
 echo ""
