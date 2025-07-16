@@ -34,31 +34,29 @@ RUN if [ ! -f "./user_data/config.json" ]; then \
     fi
 
 # Create a robust entrypoint script that handles multiple execution methods
-RUN cat > /freqtrade/entrypoint-railway.sh << 'EOF'
-#!/bin/bash
-echo "Starting freqtrade with Railway-compatible execution..."
-
-# Method 1: Try the standard freqtrade binary
-if command -v freqtrade >/dev/null 2>&1; then
-    echo "Using freqtrade binary"
-    exec freqtrade "$@"
-fi
-
-# Method 2: Try python module execution
-if python -c "import freqtrade" >/dev/null 2>&1; then
-    echo "Using python module execution"
-    exec python -m freqtrade "$@"
-fi
-
-# Method 3: Try direct module path
-if [ -f "/usr/local/lib/python3.11/site-packages/freqtrade/__main__.py" ]; then
-    echo "Using direct module path"
-    exec python /usr/local/lib/python3.11/site-packages/freqtrade/__main__.py "$@"
-fi
-
-echo "ERROR: Could not find freqtrade installation"
-exit 1
-EOF
+RUN printf '#!/bin/bash\n\
+echo "Starting freqtrade with Railway-compatible execution..."\n\
+\n\
+# Method 1: Try the standard freqtrade binary\n\
+if command -v freqtrade >/dev/null 2>&1; then\n\
+    echo "Using freqtrade binary"\n\
+    exec freqtrade "$@"\n\
+fi\n\
+\n\
+# Method 2: Try python module execution\n\
+if python -c "import freqtrade" >/dev/null 2>&1; then\n\
+    echo "Using python module execution"\n\
+    exec python -m freqtrade "$@"\n\
+fi\n\
+\n\
+# Method 3: Try direct module path\n\
+if [ -f "/usr/local/lib/python3.11/site-packages/freqtrade/__main__.py" ]; then\n\
+    echo "Using direct module path"\n\
+    exec python /usr/local/lib/python3.11/site-packages/freqtrade/__main__.py "$@"\n\
+fi\n\
+\n\
+echo "ERROR: Could not find freqtrade installation"\n\
+exit 1\n' > /freqtrade/entrypoint-railway.sh
 
 RUN chmod +x /freqtrade/entrypoint-railway.sh
 
