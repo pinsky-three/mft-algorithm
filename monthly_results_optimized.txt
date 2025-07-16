@@ -4,7 +4,7 @@ Strategy: CryptoScalpingOptimized v10 (Balanced Risk/Reward)
 Pairs: BTC/USDT, ETH/USDT, SOL/USDT
 Timeframe: 1m
 Optimization: -2.5% stop loss, 2.5%/2%/1.5% ROI, regime filtering
-Generated: Mon Jul 14 12:45:46 -05 2025
+Generated: Tue Jul 15 18:15:55 -05 2025
 
 📅 January_2025 (20250101-20250201)
    Total Profit: 0.53% (5.262 USDT)

@@ -1,15 +1,6 @@
 #!/bin/bash
 
 # Test each month individually with optimized strategy and save results
-months=(
-    "20250101-20250201"  # January 2025
-    "20250201-20250301"  # February 2025  
-    "20250301-20250401"  # March 2025
-    "20250401-20250501"  # April 2025
-    "20250501-20250601"  # May 2025
-    "20250601-20250701"  # June 2025
-    "20250701-20250710"  # July 2025 (partial)
-)
 
 month_names=(
     "January_2025"

@@ -1,0 +1,12 @@
+🔍 HYPEROPT STRATEGY RESULTS (Default Parameters)
+===================================================
+Strategy: CryptoScalpingOptimizedHyperopt
+Test Period: 20250101-20250301
+Pairs: BTC/USDT ETH/USDT SOL/USDT
+
+Total Profit %: 0.29%
+Absolute Profit: 2.895 USDT
+Total Trades: 91
+Win Rate: 62.6%
+Max Drawdown: 0.99%
+
