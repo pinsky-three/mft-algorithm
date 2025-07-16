@@ -8,6 +8,11 @@ COPY ./user_data /freqtrade/user_data
 # Switch to root for setup
 USER root
 
+# CRITICAL: Backup freqtrade source before Railway volume mounting destroys it
+RUN echo "Backing up freqtrade source for Railway compatibility..." && \
+    cp -r /freqtrade/freqtrade /usr/local/lib/python3.13/site-packages/ && \
+    echo "Freqtrade source backed up to Python site-packages"
+
 # Create logs directory, set permissions, and ensure config exists
 RUN mkdir -p ./user_data/logs && \
     chmod -R 777 ./user_data && \
@@ -20,9 +25,40 @@ RUN echo "Checking Python and freqtrade installation..." && \
     python --version && \
     echo "Python environment verified"
 
-# Create a Railway-compatible startup script that sets the correct Python path
-RUN printf '#!/bin/bash\n# Ensure freqtrade source is in Python path for Railway volume mounting\nexport PYTHONPATH="/freqtrade:$PYTHONPATH"\ncd /freqtrade\nexec python -m freqtrade "$@"\n' > /usr/local/bin/freqtrade-railway && \
-    chmod +x /usr/local/bin/freqtrade-railway
+# Create Railway startup script that uses backed up freqtrade source
+RUN cat > /usr/local/bin/freqtrade-railway << 'SCRIPT'
+#!/bin/bash
+echo "=== Railway Freqtrade Startup ==="
+echo "Python: $(which python) ($(python --version))"
+echo "Working dir: $(pwd)"
+
+# First try standard PYTHONPATH
+echo "Trying standard freqtrade import..."
+export PYTHONPATH="/freqtrade:$PYTHONPATH"
+cd /freqtrade
+
+if python -c "import freqtrade" 2>/dev/null; then
+    echo "✅ Using standard freqtrade installation"
+else
+    echo "❌ Standard freqtrade not available (likely due to Railway volume mounting)"
+    echo "✅ Using backed up freqtrade from Python site-packages"
+    # Remove /freqtrade from PYTHONPATH since it's been mounted over
+    export PYTHONPATH=$(echo "$PYTHONPATH" | sed 's|/freqtrade:||g')
+    
+    if python -c "import freqtrade" 2>/dev/null; then
+        echo "✅ Freqtrade successfully loaded from backup"
+    else
+        echo "❌ Even backup failed. System info:"
+        python -c "import sys; print('Python path:'); [print('  ', p) for p in sys.path]"
+        ls -la /usr/local/lib/python3.13/site-packages/ | grep freqtrade || echo "No freqtrade in site-packages"
+    fi
+fi
+
+echo "=== Starting freqtrade ==="
+exec python -m freqtrade "$@"
+SCRIPT
+
+RUN chmod +x /usr/local/bin/freqtrade-railway
 
 # Create default config if it doesn't exist
 RUN if [ ! -f "./user_data/config.json" ]; then \
@@ -35,7 +71,7 @@ USER ftuser
 
 EXPOSE 8080
 
-# Use our Railway-compatible script that sets PYTHONPATH correctly
+# Use our Railway-compatible script that handles volume mounting
 ENTRYPOINT ["freqtrade-railway"]
 
 CMD ["trade", \
