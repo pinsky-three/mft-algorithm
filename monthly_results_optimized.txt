@@ -4,43 +4,43 @@ Strategy: CryptoScalpingOptimized v10 (Balanced Risk/Reward)
 Pairs: BTC/USDT, ETH/USDT, SOL/USDT
 Timeframe: 1m
 Optimization: -2.5% stop loss, 2.5%/2%/1.5% ROI, regime filtering
-Generated: Tue Jul 15 18:15:55 -05 2025
+Generated: Tue Jul 15 23:05:07 -05 2025
 
 📅 January_2025 (20250101-20250201)
-   Total Profit: 0.53% (5.262 USDT)
-   Trades: 41
-   Win Rate: 68.3%
-   📊 ROI exits: 28, Stop losses: 13, Drawdown: 0.28%
+   Total Profit: 1.46% (14.572 USDT)
+   Trades: 39
+   Win Rate: 71.8%
+   📊 ROI exits: 28, Stop losses: 11, Drawdown: 0.25%
 
 📅 February_2025 (20250201-20250301)
-   Total Profit: 0.42% (4.247 USDT)
-   Trades: 40
-   Win Rate: 65.0%
-   📊 ROI exits: 26, Stop losses: 12, Drawdown: 0.58%
+   Total Profit: 0.15% (1.526 USDT)
+   Trades: 36
+   Win Rate: 55.6%
+   📊 ROI exits: 19, Stop losses: 14, Drawdown: 0.74%
 
 📅 March_2025 (20250301-20250401)
-   Total Profit: -0.47% (-4.668 USDT)
-   Trades: 54
-   Win Rate: 57.4%
-   📊 ROI exits: 31, Stop losses: 23, Drawdown: 0.77%
+   Total Profit: -0.42% (-4.19 USDT)
+   Trades: 47
+   Win Rate: 51.1%
+   📊 ROI exits: 24, Stop losses: 23, Drawdown: 0.80%
 
 📅 April_2025 (20250401-20250501)
-   Total Profit: 0.18% (1.795 USDT)
-   Trades: 65
-   Win Rate: 63.1%
-   📊 ROI exits: 41, Stop losses: 24, Drawdown: 0.91%
+   Total Profit: 0.53% (5.333 USDT)
+   Trades: 61
+   Win Rate: 59.0%
+   📊 ROI exits: 36, Stop losses: 25, Drawdown: 0.83%
 
 📅 May_2025 (20250501-20250601)
-   Total Profit: 0.30% (2.975 USDT)
-   Trades: 39
-   Win Rate: 66.7%
-   📊 ROI exits: 26, Stop losses: 13, Drawdown: 0.51%
+   Total Profit: 0.67% (6.749 USDT)
+   Trades: 34
+   Win Rate: 64.7%
+   📊 ROI exits: 22, Stop losses: 12, Drawdown: 0.48%
 
 📅 June_2025 (20250601-20250701)
-   Total Profit: 0.04% (0.402 USDT)
-   Trades: 14
-   Win Rate: 64.3%
-   📊 ROI exits: 9, Stop losses: 5, Drawdown: 0.38%
+   Total Profit: 0.07% (0.65 USDT)
+   Trades: 12
+   Win Rate: 58.3%
+   📊 ROI exits: 7, Stop losses: 5, Drawdown: 0.38%
 
 📅 July_2025_partial (20250701-20250710)
    Total Profit: -0.13% (-1.268 USDT)
@@ -51,7 +51,7 @@ Generated: Tue Jul 15 18:15:55 -05 2025
 =================================================================================
 📊 SUMMARY STATISTICS
 =================================================================================
-Total Period Profit: 8.745 USDT
-Total Trades: 254
-Average Monthly Profit: 1.457 USDT
+Total Period Profit: 23.372 USDT
+Total Trades: 230
+Average Monthly Profit: 3.895 USDT
 

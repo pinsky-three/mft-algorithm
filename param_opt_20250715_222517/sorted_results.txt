@@ -1,0 +1,10 @@
+volume_strict|0|||⚪ NEUTRAL|Higher volume threshold (2.1x) - premium liquidity only
+volume_relaxed|0|||⚪ NEUTRAL|Lower volume threshold (1.7x) - more trades
+roi_conservative|0|||⚪ NEUTRAL|Lower ROI targets (2.0%/1.5%/1.0%) - longer holds
+roi_aggressive|0|||⚪ NEUTRAL|Higher ROI targets (3.0%/2.5%/2.0%) - faster exits
+risk_tight|0|||⚪ NEUTRAL|Tighter stop loss (-2.0%) - smaller losses
+risk_loose|0|||⚪ NEUTRAL|Looser stop loss (-3.0%) - ride more volatility
+health_strict|0|||⚪ NEUTRAL|Strict market filters (0.6/0.25/0.6) - higher quality only
+health_relaxed|0|||⚪ NEUTRAL|Relaxed market filters (0.4/0.15/0.8) - more opportunities
+combo_balanced|0|||⚪ NEUTRAL|Balanced combo: Conservative ROI + Strict health + Loose risk
+combo_aggressive|0|||⚪ NEUTRAL|Aggressive combo: Higher ROI + Relaxed health + Tight risk
