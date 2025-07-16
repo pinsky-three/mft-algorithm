@@ -21,15 +21,8 @@ RUN echo "Checking Python and freqtrade installation..." && \
     echo "Python environment verified"
 
 # Create a Railway-compatible startup script that sets the correct Python path
-RUN cat > /usr/local/bin/freqtrade-railway << 'EOF'
-#!/bin/bash
-# Ensure freqtrade source is in Python path for Railway volume mounting
-export PYTHONPATH="/freqtrade:$PYTHONPATH"
-cd /freqtrade
-exec python -m freqtrade "$@"
-EOF
-
-RUN chmod +x /usr/local/bin/freqtrade-railway
+RUN printf '#!/bin/bash\n# Ensure freqtrade source is in Python path for Railway volume mounting\nexport PYTHONPATH="/freqtrade:$PYTHONPATH"\ncd /freqtrade\nexec python -m freqtrade "$@"\n' > /usr/local/bin/freqtrade-railway && \
+    chmod +x /usr/local/bin/freqtrade-railway
 
 # Create default config if it doesn't exist
 RUN if [ ! -f "./user_data/config.json" ]; then \
