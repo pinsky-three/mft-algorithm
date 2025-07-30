@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  backtrader:
+    build:
+      context: .
+      dockerfile: Dockerfile.backtrader
+    volumes:
+      - ./user_data:/app/user_data
+      - ./backtrader:/app/backtrader
+    working_dir: /app
+    command: python backtrader/examples/simple_backtest.py

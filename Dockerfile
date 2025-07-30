@@ -6,7 +6,7 @@ WORKDIR /freqtrade
 COPY ./user_data /freqtrade/user_data
 
 # Switch to root for setup
-USER root
+# USER root
 
 # # CRITICAL: Backup freqtrade source before Railway volume mounting destroys it
 # RUN echo "Backing up freqtrade source for Railway compatibility..." && \
@@ -66,14 +66,16 @@ USER root
 
 
 # Switch back to ftuser for security
-USER ftuser
+# USER ftuser
 
 EXPOSE 8080
 
-# Use our Railway-compatible script that handles volume mounting
-ENTRYPOINT ["freqtrade-railway"]
+# RUN chown ftuser:ftuser ./user_data
 
-CMD ["trade", \
+# Use our Railway-compatible script that handles volume mounting
+# ENTRYPOINT ["freqtrade-railway"]
+
+ENTRYPOINT ["sudo", "freqtrade", "trade", \
      "--logfile", "./user_data/logs/freqtrade.log", \
      "--db-url", "sqlite:///./user_data/tradesv3.sqlite", \
      "--config", "./user_data/config.json", \
