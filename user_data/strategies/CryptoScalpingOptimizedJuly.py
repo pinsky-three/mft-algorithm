@@ -1,26 +1,3 @@
-# pragma pylint: disable=missing-docstring, invalid-name, pointless-string-statement
-# flake8: noqa: F401
-# isort: skip_file
-
-"""
-Crypto Scalping Optimized July 2025 - CURRENT MARKET ADAPTATION 🎯
-==================================================================
-
-JULY 2025 PROBLEM IDENTIFIED:
-- Only 1 trade in 11 days (over-filtering in current conditions)
-- Market up +8.11% but strategy missed opportunities
-- Strategy too conservative for current market regime
-
-🔧 JULY 2025 ADAPTATIONS:
-1. RELAXED MARKET HEALTH: 0.4 (vs 0.5) - Accept current conditions
-2. REDUCED VOLUME THRESHOLD: 1.7x (vs 1.9x) - More opportunities  
-3. RELAXED RSI: 55 (vs 57) - Earlier entries in trending market
-4. RELAXED MOMENTUM: 0.75 (vs 0.78) - Accept moderate momentum
-5. ENHANCED SESSION FILTER: Better adapt to July trading patterns
-
-🎯 TARGET: Maintain strong performance in other months while adapting to July
-Expected: 2-4 trades per week in July conditions vs current 0.1 trades/day
-"""
 
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
@@ -35,10 +12,7 @@ from freqtrade.persistence import Trade
 from freqtrade.strategy import IStrategy, merge_informative_pair
 
 class CryptoScalpingOptimizedJuly(IStrategy):
-    """
-    JULY 2025 MARKET-ADAPTED SCALPING - Balanced Filtering for Current Conditions
-    Maintains historical performance while adapting to July market regime
-    """
+    
 
     INTERFACE_VERSION = 3
     timeframe: str = "1m"
@@ -412,31 +386,3 @@ class CryptoScalpingOptimizedJuly(IStrategy):
         PROVEN ROI-ONLY STRATEGY: Let validated ROI ladder handle exits
         """
         return dataframe
-
-# === JULY 2025 OPTIMIZATION SUMMARY ===
-"""
-🎯 JULY 2025 MARKET ADAPTATIONS:
-
-PROBLEM:
-❌ Only 1 trade in 11 days in July (over-filtering)
-❌ Market up +8.11% but strategy missed opportunities
-
-SOLUTIONS:
-✅ Market Health: Relaxed to 0.4 (from 0.5)
-✅ Volume Threshold: Relaxed to 1.7x (from 1.9x)  
-✅ RSI Threshold: Relaxed to 55 (from 57)
-✅ Momentum Strength: Relaxed to 0.75 (from 0.78)
-✅ Session Filter: Added Asian session for more opportunities
-✅ Adaptive Penalties: Reduced to be less restrictive
-
-🏆 EXPECTED JULY RESULTS:
-- Increase from 0.1 trades/day to 2-4 trades/week
-- Maintain risk profile (same ROI/stoploss)
-- Preserve strong performance in other months
-- Better capture July market movements
-
-📊 VALIDATION STRATEGY:
-✅ Test July performance (target: 2-3 trades minimum)
-✅ Verify other months maintain performance
-✅ Deploy if July improves without compromising history
-""" 

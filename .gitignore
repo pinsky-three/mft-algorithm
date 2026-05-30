@@ -1,4 +1,6 @@
 /target
+.DS_Store
+mft_backtrader/
 user_data/tradesv3.sqlite
 user_data/tradesv3.sqlite-shm
 user_data/logs/freqtrade.log
